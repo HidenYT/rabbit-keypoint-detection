@@ -14,9 +14,13 @@
     <img src="images/architecture%20-%20data%20preparation.png" alt="drawing" width="300"/>
 </p>
 
+---
+
 <p align="center">
 <img src="images/architecture%20-%20NN%20training.png" alt="drawing" width="450"/>
 </p>
+
+---
 
 <p align="center">
 <img src="images/architecture - inference.png" alt="drawing" width="400"/>
