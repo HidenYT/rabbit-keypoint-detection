@@ -1,10 +1,14 @@
-from core.view import View
+from .nn_learning_controller import LearningController
+from core.page_view import PageView
 import tkinter as tk
 from tkinter import ttk
 
-class LearningView(View):
+class LearningView(PageView):
 
     WINDOW_TITLE = "Обучение нейросети"
+
+    def __init__(self, controller: LearningController):
+        super().__init__(controller)
 
     def _init_menu(self) -> None:
         file_menu = tk.Menu(self.menu, tearoff=0)

@@ -1,12 +1,15 @@
 from typing import Dict
 import tkinter as tk
 from tkinter import ttk
-from core.controller import Controller
-from core.view import View
+from core.page_view import PageView
+from . import nn_inference_controller
 
-class InferenceView(View):
+class InferenceView(PageView):
 
     WINDOW_TITLE = "Запуск нейросети"
+
+    def __init__(self, controller: nn_inference_controller.InferenceController):
+        super().__init__(controller)
 
     def _init_menu(self) -> tk.Menu:
         file_menu = tk.Menu(self.menu, tearoff=0)

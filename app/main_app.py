@@ -3,9 +3,14 @@ try:
     from ctypes import windll
     windll.shcore.SetProcessDpiAwareness(1)
 except: pass
+from core.page_controller import PageController
+from core.page_view import PageView
 from nn_inference.nn_inference_controller import InferenceController
+from nn_inference.nn_inference_view import InferenceView
 from video_labeling.video_labeling_controller import LabelingController
+from video_labeling.video_labeling_view import LabelingView
 from nn_learning.nn_learning_controller import LearningController
+from nn_learning.nn_learning_view import LearningView
 
 class MainApp(tk.Tk):
     APP_TITLE = "Animal keypoint detector"
@@ -15,20 +20,24 @@ class MainApp(tk.Tk):
         self.title(self.APP_TITLE)
         self.frame.pack()
 
-    def run_nn_inference_window(self):
+    def run_window(self, controller: PageController, view: PageView):
         self.frame.pack_forget()
+        view.show_view()
+
+    def run_nn_inference_window(self):
         cntr = InferenceController(self)
-        cntr.show_view()
+        view = InferenceView(cntr)
+        self.run_window(cntr, view)
 
     def run_labeling_window(self):
-        self.frame.pack_forget()
         cntr = LabelingController(self)
-        cntr.show_view()
+        view = LabelingView(cntr)
+        self.run_window(cntr, view)
 
     def run_learning_window(self):
-        self.frame.pack_forget()
         cntr = LearningController(self)
-        cntr.show_view()
+        view = LearningView(cntr)
+        self.run_window(cntr, view)
 
     def __init__(self, screenName: str | None = None, baseName: str | None = None, className: str = "Tk", useTk: bool = True, sync: bool = False, use: str | None = None) -> None:
         super().__init__(screenName, baseName, className, useTk, sync, use)
