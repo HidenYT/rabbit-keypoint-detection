@@ -1,63 +1,48 @@
 import tkinter as tk
+from core.main_app_interface import MainAppMixin
+from skeletor_creation.skeleton_controller import SkeletonController
+from video_labeling.video_labeling_controller import LabelingController
+from nn_learning.nn_learning_controller import LearningController
+from nn_inference.nn_inference_controller import InferenceController
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from core.view import View
+
 try:
     from ctypes import windll
     windll.shcore.SetProcessDpiAwareness(1)
 except: pass
-from core.page_controller import PageController
-from core.page_view import PageView
-from nn_inference.nn_inference_controller import InferenceController
-from nn_inference.nn_inference_view import InferenceView
-from video_labeling.video_labeling_controller import LabelingController
-from video_labeling.video_labeling_view import LabelingView
-from nn_learning.nn_learning_controller import LearningController
-from nn_learning.nn_learning_view import LearningView
 
-class MainApp(tk.Tk):
+class MainApp(MainAppMixin):
     APP_TITLE = "Animal keypoint detector"
-
-    def initial_state(self):
-        self.configure(menu=self.menu)
-        self.title(self.APP_TITLE)
-        self.frame.pack()
-
-    def run_window(self, controller: PageController, view: PageView):
-        self.frame.pack_forget()
-        view.show_view()
-
-    def run_nn_inference_window(self):
-        cntr = InferenceController(self)
-        view = InferenceView(cntr)
-        self.run_window(cntr, view)
-
-    def run_labeling_window(self):
-        cntr = LabelingController(self)
-        view = LabelingView(cntr)
-        self.run_window(cntr, view)
-
-    def run_learning_window(self):
-        cntr = LearningController(self)
-        view = LearningView(cntr)
-        self.run_window(cntr, view)
 
     def __init__(self, screenName: str | None = None, baseName: str | None = None, className: str = "Tk", useTk: bool = True, sync: bool = False, use: str | None = None) -> None:
         super().__init__(screenName, baseName, className, useTk, sync, use)
+        import core.styles
         self.geometry("600x400")
-        self.menu = self.get_menu()
-        self.frame = self.get_frame()
-        self.frame.pack()
-        self.initial_state()
-
-    def get_menu(self) -> tk.Menu:
-        return tk.Menu(self)
+        self.title(self.APP_TITLE)
+        self.frame = tk.Frame()
+        self.go_to_skeleton_creation()
     
-    def get_frame(self) -> tk.Frame:
-        frame = tk.Frame(self)
+    def go_to_frames_creation(self):
+        pass
 
-        btn_labeling = tk.Button(frame, text="Разметить видео", command=self.run_labeling_window)
-        btn_labeling.pack()
-        btn_learning = tk.Button(frame, text="Обучить нейросеть", command=self.run_learning_window)
-        btn_learning.pack()
-        btn_inference = tk.Button(frame, text="Запустить обученную нейросеть", command=self.run_nn_inference_window)
-        btn_inference.pack()
+    def go_to_skeleton_creation(self):
+        self.show_view(SkeletonController(self).create_view())
 
-        return frame
+    def go_to_frames_labeling(self):
+        self.show_view(LabelingController(self).create_view())
+    
+    def go_to_nn_training(self):
+        self.show_view(LearningController(self).create_view())
+    
+    def go_to_nn_inference(self):
+        self.show_view(InferenceController(self).create_view())
+
+    def show_view(self, view: "View"):
+        menu = view.create_menu()
+        self.configure(menu = menu)
+        self.frame.pack_forget()
+        self.frame = view
+        view.pack(fill="both", expand=True)

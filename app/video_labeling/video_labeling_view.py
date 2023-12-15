@@ -1,27 +1,31 @@
-from .video_labeling_controller import LabelingController
-from core.page_view import PageView
+from tkinter import Menu
+from core.view import View
 import tkinter as tk
 
-class LabelingView(PageView):
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .video_labeling_controller import LabelingController
 
-    WINDOW_TITLE = "Разметка видео"
+class LabelingView(View):
 
-    def __init__(self, controller: LabelingController):
+    # WINDOW_TITLE = "Разметка видео"
+
+    def __init__(self, controller: "LabelingController"):
         super().__init__(controller)
-
-    def _init_menu(self) -> None:
-        file_menu = tk.Menu(self.menu, tearoff=0)
+    
+    def create_menu(self) -> Menu:
+        menu = tk.Menu(self.controller.root)
+        file_menu = tk.Menu(menu, tearoff=0)
         file_menu.add_command(label="Выбрать кадры вручную")
         file_menu.add_command(label="Автоматический выбор кадров")
-        file_menu.add_command(label="Добавить скелет")
-        file_menu.add_command(label="Создать/Изменить скелет", command=self.controller.run_create_skeleton)
+        file_menu.add_command(label="Выбрать скелет")
         file_menu.add_command(label="Сохранить всё")
         file_menu.add_command(label="Сохранить кадры")
         file_menu.add_command(label="Сохранить разметку json")
         file_menu.add_command(label="Сохранить разметку csv")
         file_menu.add_command(label="Сохранить разметку h5")
-        self.menu.add_cascade(label="Файл", menu=file_menu)
+        menu.add_cascade(label="Файл", menu=file_menu)
+        return menu
     
-    def _create_widgets(self):
-        self.widgets = []
-        self.config_widgets = {}
+    def setup_content_frame(self):
+        pass

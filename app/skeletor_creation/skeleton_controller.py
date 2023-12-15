@@ -1,9 +1,11 @@
 from typing import List, Tuple
 import tkinter as tk
-from tkinter import filedialog
 import pandas as pd
+from core.view import View
+from core.controller import ControllerNavigator
+from .skeleton_view import SkeletonEditWindow
 
-class SkeletonController:
+class SkeletonController(ControllerNavigator):
     def create_skeleton_csv(self, 
                             entries_table: List[Tuple[tk.Entry, tk.Entry]],
                             file) -> None:
@@ -16,3 +18,8 @@ class SkeletonController:
             return pd.read_csv(file)
         else:
             return pd.DataFrame()
+        
+    def create_view(self) -> View:
+        window = SkeletonEditWindow(self)
+        window.create_frame()
+        return window

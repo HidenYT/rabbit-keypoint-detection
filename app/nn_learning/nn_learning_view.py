@@ -1,23 +1,28 @@
-from .nn_learning_controller import LearningController
-from core.page_view import PageView
+from core.view import View
 import tkinter as tk
 from tkinter import ttk
 
-class LearningView(PageView):
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .nn_learning_controller import LearningController
 
-    WINDOW_TITLE = "Обучение нейросети"
+class LearningView(View):
 
-    def __init__(self, controller: LearningController):
+    # WINDOW_TITLE = "Обучение нейросети"
+
+    def __init__(self, controller: "LearningController") -> None:
         super().__init__(controller)
 
-    def _init_menu(self) -> None:
-        file_menu = tk.Menu(self.menu, tearoff=0)
+    def create_menu(self) -> tk.Menu:
+        menu = tk.Menu(self.controller.root)
+        file_menu = tk.Menu(menu, tearoff=0)
         file_menu.add_command(label="Выбрать папку с кадрами и разметкой")
         file_menu.add_command(label="Выбрать кадры для обучения")
         file_menu.add_command(label="Выбрать разметку для обучения")
-        self.menu.add_cascade(label="Файл", menu=file_menu)
+        menu.add_cascade(label="Файл", menu=file_menu)
+        return menu
 
-    def _create_widgets(self):
+    def setup_content_frame(self):
         nn_select_list = ttk.Combobox(
             state="readonly",
             values=[
@@ -26,19 +31,21 @@ class LearningView(PageView):
                 "DeepPoseKit",
                 "Self-made NN",
             ],
-            master=self.frame,
+            master=self.content_frame,
         )
         nn_select_list.current(0)
         
-        test_btn1 = tk.Checkbutton(text="Опция 1", master=self.frame)
+        test_btn1 = tk.Checkbutton(text="Опция 1", master=self.content_frame)
 
-        test_label = tk.Label(self.frame, text="Learning rate")
+        test_label = tk.Label(self.content_frame, text="Learning rate")
         
-        test_entry = tk.Entry(self.frame)
+        test_entry = tk.Entry(self.content_frame)
 
-        self.widgets = [
+        widgets = [
             nn_select_list,
             test_btn1,
             test_label,
             test_entry,
         ]
+        for w in widgets:
+            w.pack()

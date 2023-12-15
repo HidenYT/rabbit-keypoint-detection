@@ -1,13 +1,10 @@
-from core.page_controller import PageController
-from .skeleton.skeleton_window_view import SkeletonEditWindow
-from .skeleton.skeleton_controller import SkeletonController
+from core.view import View
+from core.controller import ControllerNavigator
+from .video_labeling_view import LabelingView
 
-class LabelingController(PageController):
+class LabelingController(ControllerNavigator):
     
-    def save_labels(self, data: dict):
-        print(data)
-
-    def run_create_skeleton(self):
-        skel_controller = SkeletonController()
-        root = SkeletonEditWindow(skel_controller)
-        root.mainloop()
+    def create_view(self) -> View:
+        view = LabelingView(self)
+        view.create_frame()
+        return view

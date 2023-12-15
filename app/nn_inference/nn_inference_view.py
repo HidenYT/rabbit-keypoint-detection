@@ -1,27 +1,32 @@
 from typing import Dict
 import tkinter as tk
 from tkinter import ttk
-from core.page_view import PageView
-from . import nn_inference_controller
+from core.view import View
+from typing import TYPE_CHECKING
 
-class InferenceView(PageView):
+if TYPE_CHECKING:
+    from .nn_inference_controller import InferenceController
+
+class InferenceView(View):
 
     WINDOW_TITLE = "Запуск нейросети"
 
-    def __init__(self, controller: nn_inference_controller.InferenceController):
+    def __init__(self, controller: "InferenceController"):
         super().__init__(controller)
 
-    def _init_menu(self) -> tk.Menu:
-        file_menu = tk.Menu(self.menu, tearoff=0)
+    def create_menu(self) -> tk.Menu:
+        menu = tk.Menu(self.controller.root)
+        file_menu = tk.Menu(menu, tearoff=0)
         file_menu.add_command(label="Добавить видео")
         file_menu.add_command(label="Выбрать нейросеть")
-        self.menu.add_cascade(label="Файл", menu=file_menu)
+        menu.add_cascade(label="Файл", menu=file_menu)
+        return menu
     
-    def _create_widgets(self) -> None:
-        lbl_save_option = tk.Label(master=self.frame, text="Сохранить результаты в виде...")
+    def setup_content_frame(self) -> None:
+        lbl_save_option = tk.Label(master=self.content_frame, text="Сохранить результаты в виде...")
 
         cmb_save_options = ttk.Combobox(
-            master=self.frame, 
+            master=self.content_frame, 
             state="readonly",
             values=[
                 "Файл разметки json",
@@ -33,13 +38,13 @@ class InferenceView(PageView):
         )
         cmb_save_options.current(0)
 
-        lbl_save_name = tk.Label(master=self.frame, text="Название файла (каталога при сохранении кадров)")
-        ent_save_name = tk.Entry(master=self.frame, )
+        lbl_save_name = tk.Label(master=self.content_frame, text="Название файла (каталога при сохранении кадров)")
+        ent_save_name = tk.Entry(master=self.content_frame, )
 
-        lbl_save_path = tk.Label(master=self.frame, text="Сохранить в...")
-        ent_save_path = tk.Entry(master=self.frame, )
+        lbl_save_path = tk.Label(master=self.content_frame, text="Сохранить в...")
+        ent_save_path = tk.Entry(master=self.content_frame, )
 
-        btn_run = tk.Button(master=self.frame, text="Запустить", command=self.run_click)
+        btn_run = tk.Button(master=self.content_frame, text="Запустить", command=self.run_click)
         self.widgets = [
             lbl_save_option,
             cmb_save_options,
@@ -55,6 +60,8 @@ class InferenceView(PageView):
             "file_name": ent_save_name,
             "file_path": ent_save_path,
         }
+        for w in self.widgets:
+            w.pack()
     
     def run_click(self):
         config = {}
