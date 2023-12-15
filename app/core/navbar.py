@@ -24,19 +24,24 @@ class Navbar(tk.Frame):
         
         btn_create_frames = ttk.Button(self, text="Создать кадры для разметки", 
                                       command=navigator.go_to_frames_creation,
-                                      style="navbar.TButton")
+                                      style="navbar.TButton",
+                                      takefocus=False)
         btn_create_skeleton = ttk.Button(self, text="Создать скелет", 
                                         command=navigator.go_to_skeleton_creation,
-                                        style="navbar.TButton")
+                                        style="navbar.TButton",
+                                      takefocus=False)
         btn_frames_labeling = ttk.Button(self, text="Разметить кадры", 
                                         command=navigator.go_to_frames_labeling,
-                                        style="navbar.TButton")
+                                        style="navbar.TButton",
+                                      takefocus=False)
         btn_nn_training = ttk.Button(self, text="Обучить нейросеть", 
                                         command=navigator.go_to_nn_training,
-                                        style="navbar.TButton")
+                                        style="navbar.TButton",
+                                      takefocus=False)
         btn_nn_inference = ttk.Button(self, text="Запустить нейросеть", 
                                         command=navigator.go_to_nn_inference,
-                                        style="navbar.TButton")
+                                        style="navbar.TButton",
+                                      takefocus=False)
         btns = [
             btn_create_frames,
             btn_create_skeleton,

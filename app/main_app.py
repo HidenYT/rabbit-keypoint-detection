@@ -4,6 +4,7 @@ from skeletor_creation.skeleton_controller import SkeletonController
 from video_labeling.video_labeling_controller import LabelingController
 from nn_learning.nn_learning_controller import LearningController
 from nn_inference.nn_inference_controller import InferenceController
+from core.navbar import Navbar
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -22,14 +23,20 @@ class MainApp(MainAppMixin):
         import core.styles
         self.geometry("600x400")
         self.title(self.APP_TITLE)
-        self.frame = tk.Frame()
-        self.go_to_skeleton_creation()
+        self.navbar = Navbar(self, self)
+        self.navbar.pack(fill="x")
+        self.free_space = tk.Frame(self)
+        self.free_space.pack(fill="both", expand=True)
+        self.frame = tk.Frame(self.free_space)
+        self.current_controller = None
+        #self.go_to_skeleton_creation()
     
     def go_to_frames_creation(self):
         pass
 
     def go_to_skeleton_creation(self):
         self.show_view(SkeletonController(self).create_view())
+        self.current_controller = SkeletonController
 
     def go_to_frames_labeling(self):
         self.show_view(LabelingController(self).create_view())
@@ -41,8 +48,9 @@ class MainApp(MainAppMixin):
         self.show_view(InferenceController(self).create_view())
 
     def show_view(self, view: "View"):
-        menu = view.create_menu()
-        self.configure(menu = menu)
+        
         self.frame.pack_forget()
         self.frame = view
         view.pack(fill="both", expand=True)
+        menu = view.create_menu()
+        self.configure(menu = menu)

@@ -2,7 +2,7 @@ from tkinter import ttk
 
 ttk.Style().configure("default.TButton", padding=10, font=('Helvetica', 10))
 
-ttk.Style().configure("navbar.TButton", padding=10, font=('Helvetica', 10))
+ttk.Style().configure("navbar.TButton", padding=10, font=('Helvetica', 10), relief="!pressed")
 
 ttk.Style().configure("default.TLabel", font=('Helvetica', 10), padding=10)
 

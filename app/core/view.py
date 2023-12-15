@@ -8,10 +8,8 @@ if TYPE_CHECKING:
 
 class View(ABC, tk.Frame):
     def __init__(self, controller: "ControllerNavigator") -> None:
-        super().__init__(controller.root)
+        super().__init__(controller.root.free_space)
         self.controller = controller
-        self.navbar = Navbar(controller, self)
-        self.navbar.pack(fill="x")
         self.content_frame = tk.Frame(self)
 
     @abstractmethod
