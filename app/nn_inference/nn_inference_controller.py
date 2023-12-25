@@ -5,9 +5,7 @@ from .nn_inference_view import InferenceView
 class InferenceController(ControllerNavigator):
 
     def create_view(self) -> View:
-        view = InferenceView(self)
-        view.create_frame()
-        return view
+        return InferenceView(self)
 
     def process(self, data: dict):
         print(data)    

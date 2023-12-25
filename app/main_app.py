@@ -48,9 +48,8 @@ class MainApp(MainAppMixin):
         self.show_view(InferenceController(self).create_view())
 
     def show_view(self, view: "View"):
-        
         self.frame.pack_forget()
         self.frame = view
         view.pack(fill="both", expand=True)
         menu = view.create_menu()
-        self.configure(menu = menu)
+        #self.configure(menu = menu)

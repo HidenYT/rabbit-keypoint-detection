@@ -8,11 +8,16 @@ if TYPE_CHECKING:
     from .view import View
 
 class Controller(ABC):
+    '''Базовый класс контроллера. 
+    При создании принимает корневое приложение MainApp. 
+    
+    Может создать View.'''
     def __init__(self, root: "MainApp") -> None:
         self.root = root
     
     @abstractmethod
     def create_view(self) -> "View":
+        '''Возвращает свой View.'''
         pass
 
 class ControllerNavigator(INavigator, Controller):

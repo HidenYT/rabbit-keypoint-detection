@@ -9,17 +9,20 @@ class SkeletonController(ControllerNavigator):
     def create_skeleton_csv(self, 
                             entries_table: List[Tuple[tk.Entry, tk.Entry]],
                             file) -> None:
+        '''Вызывается представлением, когда пользователь сохраняет csv файл скелета.'''
+        # Получаем все значения таблицы скелета в виде списка пар значений.
         data = [(e1.get(), e2.get()) for e1, e2 in entries_table]
+
+        # Создание и сохранение pandas DataFrame в csv фйал
         df = pd.DataFrame(data=data, columns=["Keypoint name", "Parent name"])
         df.to_csv(file, index=False)
     
     def read_csv(self, file):
+        '''Вызывается представлением, когда пользователь открывает csv файл скелета.'''
         if file is not None:
             return pd.read_csv(file)
         else:
             return pd.DataFrame()
         
     def create_view(self) -> View:
-        window = SkeletonEditWindow(self)
-        window.create_frame()
-        return window
+        return SkeletonEditWindow(self)

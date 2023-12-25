@@ -13,6 +13,7 @@ class InferenceView(View):
 
     def __init__(self, controller: "InferenceController"):
         super().__init__(controller)
+        self.setup_content_frame()
 
     def create_menu(self) -> tk.Menu:
         menu = tk.Menu(self.controller.root)
@@ -23,10 +24,10 @@ class InferenceView(View):
         return menu
     
     def setup_content_frame(self) -> None:
-        lbl_save_option = tk.Label(master=self.content_frame, text="Сохранить результаты в виде...")
+        lbl_save_option = tk.Label(master=self, text="Сохранить результаты в виде...")
 
         cmb_save_options = ttk.Combobox(
-            master=self.content_frame, 
+            master=self, 
             state="readonly",
             values=[
                 "Файл разметки json",
@@ -38,13 +39,13 @@ class InferenceView(View):
         )
         cmb_save_options.current(0)
 
-        lbl_save_name = tk.Label(master=self.content_frame, text="Название файла (каталога при сохранении кадров)")
-        ent_save_name = tk.Entry(master=self.content_frame, )
+        lbl_save_name = tk.Label(master=self, text="Название файла (каталога при сохранении кадров)")
+        ent_save_name = tk.Entry(master=self, )
 
-        lbl_save_path = tk.Label(master=self.content_frame, text="Сохранить в...")
-        ent_save_path = tk.Entry(master=self.content_frame, )
+        lbl_save_path = tk.Label(master=self, text="Сохранить в...")
+        ent_save_path = tk.Entry(master=self, )
 
-        btn_run = tk.Button(master=self.content_frame, text="Запустить", command=self.run_click)
+        btn_run = tk.Button(master=self, text="Запустить", command=self.run_click)
         self.widgets = [
             lbl_save_option,
             cmb_save_options,

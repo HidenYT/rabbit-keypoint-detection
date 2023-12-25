@@ -13,6 +13,7 @@ class SkeletonEditWindow(View):
     def __init__(self, controller: "SkeletonController") -> None:
         super().__init__(controller)
         self.focus_row = None
+        self.setup_content_frame()
 
     def create_menu(self) -> Menu:
         main_menu = tk.Menu(self.controller.root)
@@ -25,10 +26,10 @@ class SkeletonEditWindow(View):
     
     def setup_content_frame(self):
         self.entries_table: List[Tuple[tk.Entry, tk.Entry]] = []
-        self.frm_table = VerticalScrolledFrame(self.content_frame)
+        self.frm_table = VerticalScrolledFrame(self)
         self.create_empty_table()
 
-        frm_bottom_panel = tk.Frame(self.content_frame)
+        frm_bottom_panel = tk.Frame(self)
         for i in range(2):
             frm_bottom_panel.grid_columnconfigure(i, weight=1)
         
@@ -117,7 +118,7 @@ class SkeletonEditWindow(View):
         self.grid_rows_num = 0
         self.frm_table.pack_forget()
         self.entries_table.clear()
-        self.frm_table = frm_table = VerticalScrolledFrame(self.content_frame)
+        self.frm_table = frm_table = VerticalScrolledFrame(self)
         frm_table.interior.grid_columnconfigure(0, weight=1, uniform=True)
         frm_table.interior.grid_columnconfigure(1, weight=1, uniform=True)
         lbl_point_name = ttk.Label(frm_table.interior, text="Название точки",

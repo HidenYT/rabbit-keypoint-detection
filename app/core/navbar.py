@@ -3,6 +3,7 @@ from tkinter import ttk
 from abc import ABC, abstractmethod
 
 class INavigator(ABC):
+    '''Интерфейс для классов, которые хотят обрабатывать нажатия на кнопки главного меню.'''
     @abstractmethod
     def go_to_frames_creation(self): pass
     
@@ -19,6 +20,8 @@ class INavigator(ABC):
     def go_to_nn_inference(self): pass
 
 class Navbar(tk.Frame):
+    '''Главное меню, которое является фреймом `Frame`. 
+    Содержит кнопки для перехода между представлениями. По нажатии на кнопку вызывает соответствующий метод переданного наследника `INavigator`.'''
     def __init__(self, navigator: INavigator, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         

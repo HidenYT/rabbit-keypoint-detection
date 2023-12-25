@@ -7,6 +7,10 @@ if TYPE_CHECKING:
     from .controller import ControllerNavigator
 
 class View(ABC, tk.Frame):
+    '''Базовый класс для представлений. При создании принимает контроллер, соответствующий данному представлению. Этому контроллеру представление будет передавать различные команды от пользовательского интерфейса.
+    
+    Представление - фрейм, который помещается основным приложением в его GUI. 
+    '''
     def __init__(self, controller: "ControllerNavigator") -> None:
         super().__init__(controller.root.free_space)
         self.controller = controller
@@ -14,12 +18,5 @@ class View(ABC, tk.Frame):
 
     @abstractmethod
     def create_menu(self) -> tk.Menu:
+        '''Метод должен возвращать меню `Menu` данного представления.'''
         pass
-
-    @abstractmethod
-    def setup_content_frame(self):
-        pass
-
-    def create_frame(self):
-        self.setup_content_frame()
-        self.content_frame.pack(fill="both", expand=True)
