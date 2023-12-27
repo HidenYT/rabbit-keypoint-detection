@@ -6,15 +6,13 @@ from tkinter import filedialog
 from core.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
 from core.image import ImageFile
+from core.skeleton import Skeleton
 
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from .video_labeling_controller import LabelingController
 
 class LabelingView(View):
-
-    # WINDOW_TITLE = "Разметка видео"
-
     def __init__(self, controller: "LabelingController"):
         super().__init__(controller)
         self.setup_content_frame()
@@ -22,7 +20,16 @@ class LabelingView(View):
         self.images_list: List[ImageFile] = []
         
         # Список кнопок изображений
-        self.img_buttons_list: List[ttk.Button] = []
+        self.img_buttons_list: List[tk.Button] = []
+
+        # Список LabelinCanvas-ов. Каждый отвечает за своё изображение, хранит его разметку
+        self.canvases: List[LabelingCanvas] = []
+
+        # Открытый Canvas
+        self.canvas: LabelingCanvas | None = None
+
+        # Скелет
+        self.skeleton: Skeleton | None = None
     
     def create_menu(self) -> Menu:
         menu = tk.Menu(self.controller.root)
@@ -42,21 +49,12 @@ class LabelingView(View):
         self.canvas_frame = tk.Frame(self)
         self.configuration_frame = tk.Frame(self)
         self.setup_config_frame()
-        self.setup_canvas_frame()
+
         self.grid_columnconfigure(0, weight=3, uniform=True)
         self.grid_columnconfigure(1, weight=2, uniform=True)
         self.grid_rowconfigure(0, weight=1, uniform=True)
-        #self.canvas_frame.pack(expand=True, fill=tk.BOTH, side=tk.LEFT)
-        #self.configuration_frame.pack(expand=True, fill=tk.BOTH, side=tk.RIGHT)
         self.canvas_frame.grid(row=0, column=0, sticky="nsew")
         self.configuration_frame.grid(row=0, column=1, sticky="nsew")
-
-    def setup_canvas_frame(self):
-        canvas_frame = self.canvas_frame
-        self.canvas = canvas = LabelingCanvas(canvas_frame)
-        #canvas.setup()
-
-        canvas.pack(expand=True, fill=tk.BOTH)
 
     def setup_config_frame(self):
         config_frame = self.configuration_frame
@@ -75,13 +73,15 @@ class LabelingView(View):
         config_frame = self.configuration_frame
         images_list = VerticalScrolledFrame(config_frame)
         images_list.interior.grid_columnconfigure(0, weight=1, uniform=True)
-        # interior = images_list.interior
         return images_list
     
     def add_image_to_images_list(self, image_path: str):
         image = ImageFile(image_path)
+        canvas = LabelingCanvas(self.canvas_frame, image)
+        if self.skeleton is not None:
+            canvas.set_skeleton(self.skeleton)
         def command():
-            self.show_image(image)
+            self.show_canvas(canvas)
         btn_image = tk.Button(
             self.images_list_frame.interior, 
             text=f"{image_path}", 
@@ -90,25 +90,30 @@ class LabelingView(View):
         )
         self.images_list.append(image)
         self.img_buttons_list.append(btn_image)
+        self.canvases.append(canvas)
         btn_image.grid(row=self.total_images_number, column=0, sticky="nsew")
         self.total_images_number += 1
     
     def remove_image_from_images_list(self, idx: int):
         self.images_list.pop(idx)
+        self.canvases.pop(idx)
         self.img_buttons_list.pop(idx).destroy()
 
-    def show_image(self, image: ImageFile):
-        self.canvas.show_image(image, {})
-
+    def show_canvas(self, canvas: LabelingCanvas):
+        if self.canvas is not None:
+            self.canvas.pack_forget()
+        self.canvas = canvas
+        canvas.pack(fill=tk.BOTH, expand=True)
+        canvas.update_image()
 
     def create_action_menu(self) -> tk.Frame:
         menu = tk.Frame(self.configuration_frame)
         btn_add_image = ttk.Button(menu, text="Добавить изображения", command=self.add_images)
-
+        btn_choose_skeleton = ttk.Button(menu, text="Выбрать скелет", command=self.choose_skeleton)
         btn_add_image.pack(fill=tk.BOTH, side=tk.BOTTOM)
+        btn_choose_skeleton.pack(fill=tk.BOTH, side=tk.BOTTOM)
         return menu
 
-    
     def add_images(self):
         images = filedialog.askopenfilenames(filetypes=[
             ("PNG", [".png"]),
@@ -118,3 +123,13 @@ class LabelingView(View):
         for img_path in images:
             self.add_image_to_images_list(img_path)
         
+    def choose_skeleton(self):
+        skeleton = filedialog.askopenfile(
+            defaultextension=".csv", 
+            filetypes=[("Comma separated values", [".csv"])]
+        )
+        if not skeleton: return
+        df = self.controller.open_skeleton(skeleton)
+        self.skeleton = skeleton = Skeleton(df)
+        for canvas in self.canvases:
+            canvas.set_skeleton(skeleton)
