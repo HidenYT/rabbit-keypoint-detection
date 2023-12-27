@@ -4,6 +4,7 @@ import pandas as pd
 from core.view import View
 from core.controller import ControllerNavigator
 from .skeleton_view import SkeletonEditWindow
+from core.skeleton import Skeleton
 
 class SkeletonController(ControllerNavigator):
     def create_skeleton_csv(self, 
@@ -14,8 +15,7 @@ class SkeletonController(ControllerNavigator):
         data = [(e1.get(), e2.get()) for e1, e2 in entries_table]
 
         # Создание и сохранение pandas DataFrame в csv фйал
-        df = pd.DataFrame(data=data, columns=["Keypoint name", "Parent name"])
-        df.to_csv(file, index=False)
+        Skeleton.create_skeleton_csv(data, file)
     
     def read_csv(self, file):
         '''Вызывается представлением, когда пользователь открывает csv файл скелета.'''

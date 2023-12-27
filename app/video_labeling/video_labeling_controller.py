@@ -17,34 +17,36 @@ class LabelingController(ControllerNavigator):
         return LabelingView(self)
     
     def open_skeleton(self, file) -> Skeleton:
-        try:
-            df = pd.read_csv(file)
-            self.skeleton = Skeleton(df)
-            return self.skeleton
-        except KeyError as e:
-            showwarning("Ошибка при загрузке скелета", f"Родительская точка {e} задана неверно.")
-        except Exception as e:
-            showwarning("Ошибка при загрузке скелета", f"Неизвестная ошибка: {e}.")
-        return None
+        self.skeleton = Skeleton.read_skeleton_from_csv(file)
+        return self.skeleton
 
     def save_labels(self, canvases: List[LabelingCanvas], file):
-        if self.skeleton is not None:
-            label_names = list(self.skeleton.nodes)
-            result_label_names = ["Image path"]
+        if self.skeleton is None: 
+            showwarning("Скелет не был выбран", "Невозможно сохранить разметку, так как скелет не был выбран.")
+            return
+        # Названия точек
+        label_names = list(self.skeleton.nodes)
+        # Названия столбцов в итоговом файле
+        result_label_names = ["Image path"]
+        for name in label_names:
+            result_label_names.append(f"{name}_x")
+            result_label_names.append(f"{name}_y")
+        
+        # Составляем таблицу данных
+        data = []
+        for canvas in canvases:
+            row = []
+            # Получаем координаты всех точек канваса
+            coords = canvas.keypoint_manager.get_keypoints_coordinates()
+            # Для каждой точки добавляем x и y
             for name in label_names:
-                result_label_names.append(f"{name}_x")
-                result_label_names.append(f"{name}_y")
+                row.append(int(round(coords[name][0])))
+                row.append(int(round(coords[name][1])))
+            data.append(row)
+        
+        # Добавляем во все строки в первый столбец путь к изображению
+        for i, row in enumerate(data):
+            row.insert(0, canvases[i].image.image_path)
             
-            data = []
-            for canvas in canvases:
-                row = []
-                coords = canvas.keypoint_manager.get_keypoints_coordinates()
-                for name in label_names:
-                    row.append(int(round(coords[name][0])))
-                    row.append(int(round(coords[name][1])))
-                data.append(row)
-            
-            for i, row in enumerate(data):
-                row.insert(0, canvases[i].image.image_path)
-            df = pd.DataFrame(data=data, columns=result_label_names)
-            df.to_csv(file, index=False, encoding="utf-16")
+        df = pd.DataFrame(data=data, columns=result_label_names)
+        df.to_csv(file, index=False, encoding="utf-16")
