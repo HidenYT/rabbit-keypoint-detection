@@ -10,7 +10,6 @@ class LabelingCanvas(tk.Canvas):
 
     def __init__(self, master: Misc | None, image: ImageFile) -> None:
         super().__init__(master, bg="#ffffff")
-        self.create_oval(50, 10, 150, 110, fill="#ffff00")
         
         # Zoom изображения и перемещение по нему
         self.bind("<Control-MouseWheel>", self.on_zoom)
@@ -25,18 +24,22 @@ class LabelingCanvas(tk.Canvas):
         # Изображение Canvas-а
         self.image: ImageFile = image
         self.imscale = 1.0
-        self.labels: Dict = {}
         self.width, self.height = image.pil_image.size
 
         # Контейнер для вычисления координат Canvas-а
-        self.container = self.create_rectangle(0, 0, self.width, self.height, width=4)
+        self.container = self.create_rectangle(0, 0, self.width, self.height, width=0)
         
         # Скелет и координаты его точек: id точки -> Keypoint
         self.skeleton: Skeleton | None = None
         self.keypoints: Dict[int, Keypoint] = {}
+        self.keypoint_names: Dict[str, Keypoint] = {}
 
-        self.update_image()
-        self.on_mouse_lb_release(None)
+        # Для перетаскивания точек
+        self.drag_widget = None
+        self.drag_x = 0
+        self.drag_y = 0
+
+        self.bind("<Configure>", lambda x: self.update_image())
 
     # def update_image(self):
     #     pil_img = self.image.pil_image
@@ -115,15 +118,19 @@ class LabelingCanvas(tk.Canvas):
         for id in self.keypoints:
             self.delete(id)
         self.keypoints = {}
+        self.keypoint_names = {}
         from random import randint
+        cont_x1, cont_y1, cont_x2, cont_y2 = self.bbox(self.container)
         for key in skeleton.nodes:
-            r = 10
-            pos_x = randint(0+r, self.width-r)
-            pos_y = randint(0+r, self.height-r)
+            r = int(10/self.imscale)
+            pos_x = randint(cont_x1+r, cont_x2-r)
+            pos_y = randint(cont_y1+r, cont_y2-r)
             col = lambda: randint(0,255)
             color = f'#{col():02X}{col():02X}{col():02X}'
             kpid = self.create_oval(pos_x-r, pos_y-r, pos_x+r, pos_y+r, fill=color, tags=self.KP_TAG)
-            self.keypoints[kpid] = Keypoint(key, (pos_x, pos_y), skeleton.nodes[key])
+            kp = Keypoint(key, (pos_x, pos_y), skeleton.nodes[key])
+            self.keypoints[kpid] = kp
+            self.keypoint_names[key] = kp
     
     def draw_skeleton(self):
         if self.skeleton is None: return
@@ -139,10 +146,9 @@ class LabelingCanvas(tk.Canvas):
             id = id[0]
         else:
             return
-        if id in self.keypoints:
-            self.drag_widget = id
-            self.drag_x = winX
-            self.drag_y = winY
+        self.drag_widget = id
+        self.drag_x = winX
+        self.drag_y = winY
 
     def on_mouse_lb_release(self, event):
         self.drag_widget = None
@@ -160,7 +166,17 @@ class LabelingCanvas(tk.Canvas):
             self.drag_x = winX
             self.drag_y = winY
             self.move(self.drag_widget, newX, newY)
-            self.keypoints[self.drag_widget].coordinates = (newX, newY)
+            self.keypoints[self.drag_widget].coordinates = self.bbox(self.drag_widget)[:2]
+        
+    def get_keypoints_coordinates(self) -> Dict[str, tuple[float, float]]:
+        result = {}
+        for key in self.keypoint_names:
+            result[key] = self.get_keypoint_coordinates(self.keypoint_names[key])
+        return result
+
+    def get_keypoint_coordinates(self, kp: "Keypoint"):
+        cont_x, cont_y, *_ = self.bbox(self.container)
+        return ((kp.x-cont_x)/self.imscale, (kp.y-cont_y)/self.imscale)
 
 class Keypoint:
     def __init__(self, name: str, coordinates: tuple[float, float], skeleton_node):

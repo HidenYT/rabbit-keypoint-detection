@@ -5,6 +5,7 @@ from core.scrollable_frame import VerticalScrolledFrame
 import pandas as pd
 from core.view import View
 from tkinter import ttk
+from core.filetypes import csv_ft
 
 if TYPE_CHECKING:
     from .skeleton_controller import SkeletonController
@@ -100,7 +101,7 @@ class SkeletonEditWindow(View):
         self.entries_table.pop(selected_row)
     
     def create_table_from_csv(self):
-        f = filedialog.askopenfile(defaultextension=".csv", filetypes=[("Comma separated values", [".csv"])])
+        f = filedialog.askopenfile(filetypes=[csv_ft])
         if f is not None:
             self.create_empty_table()
             df = self.controller.read_csv(f)
@@ -110,7 +111,7 @@ class SkeletonEditWindow(View):
                 self.add_row(e1, e2)
         
     def create_csv(self):
-        f = filedialog.asksaveasfile(defaultextension=".csv", filetypes=[("Comma separated values", [".csv"])])
+        f = filedialog.asksaveasfile(filetypes=[csv_ft])
         if f is not None:
             self.controller.create_skeleton_csv(self.entries_table, f)
     
