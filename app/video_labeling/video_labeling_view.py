@@ -152,4 +152,15 @@ class LabelingView(View):
     def save_labels(self):
         file = filedialog.asksaveasfile(defaultextension="", filetypes=[csv_ft])
         if file is not None:
+            scales = []
+            for canvas in self.canvases:
+                s = canvas.imscale
+                scales.append(canvas.imscale)
+                canvas.scale(tk.ALL, *canvas.get_containter_top_left(), 1/s, 1/s)
+                canvas.imscale = 1
+                canvas.update_image()
             self.controller.save_labels(self.canvases, file)
+            for i, canvas in enumerate(self.canvases):
+                canvas.scale(tk.ALL, *canvas.get_containter_top_left(), scales[i], scales[i])
+                canvas.imscale = scales[i]
+                canvas.update_image()

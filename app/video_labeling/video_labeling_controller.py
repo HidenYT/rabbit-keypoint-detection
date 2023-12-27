@@ -38,7 +38,7 @@ class LabelingController(ControllerNavigator):
             data = []
             for canvas in canvases:
                 row = []
-                coords = canvas.get_keypoints_coordinates()
+                coords = canvas.keypoint_manager.get_keypoints_coordinates()
                 for name in label_names:
                     row.append(int(round(coords[name][0])))
                     row.append(int(round(coords[name][1])))
@@ -47,4 +47,4 @@ class LabelingController(ControllerNavigator):
             for i, row in enumerate(data):
                 row.insert(0, canvases[i].image.image_path)
             df = pd.DataFrame(data=data, columns=result_label_names)
-            df.to_csv(file, index=False)
+            df.to_csv(file, index=False, encoding="utf-16")

@@ -4,10 +4,12 @@ from typing import Dict
 from core.image import ImageFile
 from PIL import ImageTk
 from core.skeleton import Skeleton, SkeletonNode
+from .keypoints import Keypoint, KeypointManager
 
 class LabelingCanvas(tk.Canvas):
     KP_TAG = "keypoint"
     SKELETON_LINE_TAG = "skeleton_line"
+    KP_RADIUS = 10
 
     def __init__(self, master: Misc | None, image: ImageFile) -> None:
         super().__init__(master, bg="#ffffff")
@@ -31,16 +33,16 @@ class LabelingCanvas(tk.Canvas):
         # Контейнер для вычисления координат Canvas-а
         self.container = self.create_rectangle(0, 0, self.width, self.height, width=0)
         
-        # Скелет и координаты его точек: id точки -> Keypoint
+        # Скелет
         self.skeleton: Skeleton | None = None
-        self.keypoints: Dict[int, Keypoint] = {}
-        self.keypoint_names: Dict[str, Keypoint] = {}
-        self.keypoint_text: Dict[int, int] = {}
 
         # Для перетаскивания точек
         self.drag_widget = None
         self.drag_x = 0
         self.drag_y = 0
+
+        # Менеджер точек
+        self.keypoint_manager = KeypointManager(self)
 
         self.bind("<Configure>", lambda x: self.update_image())
 
@@ -57,8 +59,7 @@ class LabelingCanvas(tk.Canvas):
         x, y = self.canvasx(x), self.canvasy(y)
         objects = self.find_withtag(self.KP_TAG)
         def dist(kpid):
-            coords_kp = self.bbox(kpid)
-            coords_kp = [(coords_kp[0]+coords_kp[2])/2, (coords_kp[1]+coords_kp[3])/2]
+            coords_kp = Keypoint.get_coordinates_from_bbox(self.bbox(kpid))
             return ((coords_kp[0]-x)**2 + (coords_kp[1]-y)**2)**0.5
         s = sorted(objects, key=dist)
         if s:
@@ -72,13 +73,6 @@ class LabelingCanvas(tk.Canvas):
         y = self.canvasy(event.y)
         factor = 1.001 ** event.delta
         self.scale(tk.ALL, x, y, factor, factor)
-        # kps = self.find_withtag(self.KP_TAG)
-        # if kps:
-        #     for kp in kps:
-        #         bbox = self.bbox(kp)
-        #         x, y = (bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2
-        #         self.scale(kp, x, y, 1/factor, 1/factor)
-        #         self
         self.imscale *= factor
         self.update_image()
 
@@ -125,49 +119,37 @@ class LabelingCanvas(tk.Canvas):
         
     def set_skeleton(self, skeleton: Skeleton):
         self.skeleton = skeleton
-        for id in self.keypoints:
+        for id in self.keypoint_manager.get_kp_ids():
             self.delete(id)
-            self.delete(self.keypoint_text[id])
-        self.keypoints = {}
-        self.keypoint_names = {}
-        self.keypoint_text = {}
-        from random import randint
-        cont_x1, cont_y1, cont_x2, cont_y2 = self.bbox(self.container)
+        for id in self.keypoint_manager.get_text_ids():
+            self.delete(id)
+        self.keypoint_manager.set_skeleton(skeleton)
+        self.keypoint_manager.clear()
+        
         for key in skeleton.nodes:
-            r = int(10*self.imscale)
-            print(r)
-            pos_x = randint(cont_x1+r, cont_x2-r)
-            pos_y = randint(cont_y1+r, cont_y2-r)
-            col = lambda: randint(0,255)
-            color = f'#{col():02X}{col():02X}{col():02X}'
-            kpid = self.create_oval(pos_x-r, pos_y-r, pos_x+r, pos_y+r, fill=color, tags=self.KP_TAG)
-            text_id = self.create_text(pos_x-r, pos_y-r, text=key)
-            self.keypoint_text[kpid] = text_id
-            kp = Keypoint(key, (pos_x, pos_y), skeleton.nodes[key])
-            self.keypoints[kpid] = kp
-            self.keypoint_names[key] = kp
-        self.draw_skeleton()
+            kpid, text_id = self.create_kp_on_random_position(key)
+            self.keypoint_manager.add_keypoint(kpid, key)
+            self.keypoint_manager.add_kp_text(kpid, text_id)
+        self.draw_skeleton_lines()
     
-    def draw_skeleton(self):
+    def draw_skeleton_lines(self):
         if self.skeleton is None: return
         self.delete(self.SKELETON_LINE_TAG)
-        for kpid, kp in self.keypoints.items():
-            p_bbox = self.bbox(kpid)
-            x1, y1 = (p_bbox[0]+p_bbox[2])/2, (p_bbox[1]+p_bbox[3])/2
+        for kpid in self.keypoint_manager.get_kp_ids():
+            kp = self.keypoint_manager.get_kp_by_id(kpid)
             parent_node = kp.skeleton_node.parent
-            if parent_node is None:
-                continue
-            for parent_id in self.keypoints:
-                if self.keypoints[parent_id].name == parent_node.name:
-                    break
-            parent_bbox = self.bbox(parent_id)
-            x2, y2 = (parent_bbox[0]+parent_bbox[2])/2, (parent_bbox[1]+parent_bbox[3])/2
+            if parent_node is None: continue
+            parent_id = self.keypoint_manager.get_id_by_name(parent_node.name)
+
+            x1, y1 = Keypoint.get_coordinates_from_bbox(self.bbox(kpid))
+            x2, y2 = Keypoint.get_coordinates_from_bbox(self.bbox(parent_id))
             self.create_line(x1, y1, x2, y2, tags=self.SKELETON_LINE_TAG)
 
     def on_press_to_move(self, event):
         id = self.find_closest_kp(event.x, event.y, halo = 10)
         if not id: return
         id = id[0]
+        # Сохраняем движимую точку и 
         self.drag_widget = id
         self.drag_x = event.x
         self.drag_y = event.y
@@ -179,37 +161,31 @@ class LabelingCanvas(tk.Canvas):
 
     def on_mous_lb_move(self, event):
         if self.drag_widget is None: return
-        if self.drag_widget not in self.keypoints: return
+        if self.drag_widget not in self.keypoint_manager.get_kp_ids(): return
 
         delta_x = event.x - self.drag_x
         delta_y = event.y - self.drag_y
         self.drag_x = event.x
         self.drag_y = event.y
         self.move(self.drag_widget, delta_x, delta_y)
-        self.move(self.keypoint_text[self.drag_widget], delta_x, delta_y)
-        self.keypoints[self.drag_widget].coordinates = self.bbox(self.drag_widget)[:2]
-        self.draw_skeleton()
+        self.move(self.keypoint_manager.get_text_id_by_kp_id(self.drag_widget), delta_x, delta_y)
+        self.draw_skeleton_lines()
+    
+    def get_containter_top_left(self) -> tuple[int, int]:
+        return self.bbox(self.container)[:2]
+    
+    def create_kp_on_random_position(self, key: str) -> tuple[int, int]:
+        """Создаём точку на случайной позиции со случайным цветом. 
         
-    def get_keypoints_coordinates(self) -> Dict[str, tuple[float, float]]:
-        result = {}
-        for key in self.keypoint_names:
-            result[key] = self.get_keypoint_coordinates(self.keypoint_names[key])
-        return result
+        Возвращает id точки и текста"""
+        from random import randint
+        cont_x1, cont_y1, cont_x2, cont_y2 = self.bbox(self.container)
+        r = int(self.KP_RADIUS*self.imscale)
+        pos_x = randint(cont_x1+r, cont_x2-r)
+        pos_y = randint(cont_y1+r, cont_y2-r)
+        col = lambda: randint(0,255)
+        color = f'#{col():02X}{col():02X}{col():02X}'
+        kpid = self.create_oval(pos_x-r, pos_y-r, pos_x+r, pos_y+r, fill=color, tags=self.KP_TAG)
+        text_id = self.create_text(pos_x-r, pos_y-r, text=key)
 
-    def get_keypoint_coordinates(self, kp: "Keypoint"):
-        cont_x, cont_y, *_ = self.bbox(self.container)
-        return ((kp.x-cont_x)/self.imscale, (kp.y-cont_y)/self.imscale)
-
-class Keypoint:
-    def __init__(self, name: str, coordinates: tuple[float, float], skeleton_node: SkeletonNode):
-        self.name = name
-        self.coordinates = coordinates
-        self.skeleton_node = skeleton_node
-    
-    @property
-    def x(self):
-        return self.coordinates[0]
-    
-    @property
-    def y(self):
-        return self.coordinates[1]
+        return kpid, text_id
