@@ -7,7 +7,7 @@ from core.widgets.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
 from core.models.image import ImageFile
 from core.models.skeleton import Skeleton
-from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft
+from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft, webp_ft
 
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
@@ -135,7 +135,7 @@ class LabelingView(View["LabelingController"]):
         return menu
 
     def add_images(self):
-        images = filedialog.askopenfilenames(filetypes=[images_ft, png_ft, jpg_ft])
+        images = filedialog.askopenfilenames(filetypes=[images_ft, png_ft, jpg_ft, webp_ft])
         if not images: return
         for img_path in images:
             self.add_image_to_images_list(img_path)
