@@ -32,8 +32,9 @@ class VerticalScrolledFrame(ttk.Frame):
         # also updating the scrollbar.
         def _configure_interior(event):
             # Update the scrollbars to match the size of the inner frame.
-            size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
-            canvas.config(scrollregion="0 0 %s %s" % size)
+            rw, rh = (interior.winfo_reqwidth(), interior.winfo_reqheight())
+            
+            canvas.config(scrollregion="0 0 {0} {1}".format(rw, max(rh, canvas.winfo_height())))
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 # Update the canvas's width to fit the inner frame.
                 canvas.config(width=interior.winfo_reqwidth())
@@ -44,3 +45,15 @@ class VerticalScrolledFrame(ttk.Frame):
                 # Update the inner frame's width to fill the canvas.
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
+
+        def scroll(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")  
+    
+        def _bound_to_mousewheel(event):
+            canvas.bind_all("<MouseWheel>", scroll)
+
+        def _unbound_to_mousewheel(event):
+            canvas.unbind_all("<MouseWheel>") 
+        
+        interior.bind('<Enter>', _bound_to_mousewheel)
+        interior.bind('<Leave>', _unbound_to_mousewheel)
