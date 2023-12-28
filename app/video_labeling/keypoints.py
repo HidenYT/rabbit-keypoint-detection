@@ -96,24 +96,15 @@ class Keypoint:
         self.canvas = canvas
         self.id = id
         self.skeleton_node = skeleton_node
-    
-    @staticmethod
-    def get_coordinates_from_bbox(bbox: tuple[int, int, int, int]) -> tuple[float, float]:
-        x1, y1, x2, y2 = bbox
-        return (x1+x2)/2, (y1+y2)/2 
 
     @property
     def coordinates(self):
-        return self.x, self.y
-    
-    @property
-    def bbox(self):
-        return self.canvas.bbox(self.id)
+        return self.canvas.coords(self.id)
 
     @property
     def x(self):
-        return (self.bbox[0]+self.bbox[2])/2
+        return self.coordinates[0]
     
     @property
     def y(self):
-        return (self.bbox[1]+self.bbox[3])/2
+        return self.coordinates[1]

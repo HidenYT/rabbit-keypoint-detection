@@ -8,6 +8,7 @@ from .keypoints import Keypoint, KeypointManager
 
 class LabelingCanvas(tk.Canvas):
     KP_TAG = "keypoint"
+    KP_CIRCLE_TAG = "kp_circle"
     SKELETON_LINE_TAG = "skeleton_line"
     KP_RADIUS = 10
 
@@ -59,7 +60,7 @@ class LabelingCanvas(tk.Canvas):
         x, y = self.canvasx(x), self.canvasy(y)
         objects = self.find_withtag(self.KP_TAG)
         def dist(kpid):
-            coords_kp = Keypoint.get_coordinates_from_bbox(self.bbox(kpid))
+            coords_kp = self.coords(kpid)
             return ((coords_kp[0]-x)**2 + (coords_kp[1]-y)**2)**0.5
         s = sorted(objects, key=dist)
         if s:
@@ -75,6 +76,7 @@ class LabelingCanvas(tk.Canvas):
         self.scale(tk.ALL, x, y, factor, factor)
         self.imscale *= factor
         self.update_image()
+        self.draw_skeleton_lines()
 
     def on_mouse_rb_press(self, event):
         self.scan_mark(event.x, event.y)
@@ -118,31 +120,36 @@ class LabelingCanvas(tk.Canvas):
             self.imagetk = imagetk  # keep an extra reference to prevent garbage-collection
         
     def set_skeleton(self, skeleton: Skeleton):
+        # Удаляем старые keypoint-ы
+        for id in self.keypoint_manager.get_kp_ids(): self.delete(id)
+        for id in self.keypoint_manager.get_text_ids(): self.delete(id)
+        # Устанавливаем новый скелет, меняем его в менеджере точек
         self.skeleton = skeleton
-        for id in self.keypoint_manager.get_kp_ids():
-            self.delete(id)
-        for id in self.keypoint_manager.get_text_ids():
-            self.delete(id)
         self.keypoint_manager.set_skeleton(skeleton)
         self.keypoint_manager.clear()
         
+        # Генерируем создаём новые точки согласно скелету
         for key in skeleton.nodes:
             kpid, text_id = self.create_kp_on_random_position(key)
             self.keypoint_manager.add_keypoint(kpid, key)
             self.keypoint_manager.add_kp_text(kpid, text_id)
+        # Отрисовка
         self.draw_skeleton_lines()
     
     def draw_skeleton_lines(self):
         if self.skeleton is None: return
         self.delete(self.SKELETON_LINE_TAG)
+        self.delete(self.KP_CIRCLE_TAG)
         for kpid in self.keypoint_manager.get_kp_ids():
             kp = self.keypoint_manager.get_kp_by_id(kpid)
+            x1, y1 = self.coords(kpid)
+            self.create_oval(x1-self.KP_RADIUS, y1-self.KP_RADIUS, x1+self.KP_RADIUS, y1+self.KP_RADIUS, fill="#ffffff", tags=self.KP_CIRCLE_TAG)
+
             parent_node = kp.skeleton_node.parent
             if parent_node is None: continue
             parent_id = self.keypoint_manager.get_id_by_name(parent_node.name)
 
-            x1, y1 = Keypoint.get_coordinates_from_bbox(self.bbox(kpid))
-            x2, y2 = Keypoint.get_coordinates_from_bbox(self.bbox(parent_id))
+            x2, y2 = self.coords(parent_id)
             self.create_line(x1, y1, x2, y2, tags=self.SKELETON_LINE_TAG)
 
     def on_press_to_move(self, event):
@@ -183,9 +190,9 @@ class LabelingCanvas(tk.Canvas):
         r = int(self.KP_RADIUS*self.imscale)
         pos_x = randint(cont_x1+r, cont_x2-r)
         pos_y = randint(cont_y1+r, cont_y2-r)
-        col = lambda: randint(0,255)
-        color = f'#{col():02X}{col():02X}{col():02X}'
-        kpid = self.create_oval(pos_x-r, pos_y-r, pos_x+r, pos_y+r, fill=color, tags=self.KP_TAG)
+        #col = lambda: randint(0,255)
+        #color = f'#{col():02X}{col():02X}{col():02X}'
+        kp_id = self.create_text(pos_x, pos_y, text="", tags=self.KP_TAG)
         text_id = self.create_text(pos_x-r, pos_y-r, text=key)
 
-        return kpid, text_id
+        return kp_id, text_id
