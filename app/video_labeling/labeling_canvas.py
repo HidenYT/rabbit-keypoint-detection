@@ -3,8 +3,8 @@ from tkinter import Misc
 from typing import Dict
 from core.models.image import ImageFile
 from PIL import ImageTk
-from core.models.skeleton import Skeleton, SkeletonNode
-from .keypoints import Keypoint, KeypointManager
+from core.models.skeleton import Skeleton
+from .keypoints import KeypointManager
 
 class LabelingCanvas(tk.Canvas):
     KP_TAG = "keypoint"

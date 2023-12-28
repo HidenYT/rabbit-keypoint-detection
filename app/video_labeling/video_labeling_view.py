@@ -127,9 +127,11 @@ class LabelingView(View["LabelingController"]):
         btn_add_image = ttk.Button(menu, text="Добавить изображения", command=self.add_images)
         btn_choose_skeleton = ttk.Button(menu, text="Выбрать скелет", command=self.choose_skeleton)
         btn_save_labels = ttk.Button(menu, text="Сохранить разметку", command=self.save_labels)
+        btn_check_labels = ttk.Button(menu, text="Проверить разметку", command=self.check_labels)
         btn_add_image.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_choose_skeleton.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_save_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
+        btn_check_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
         return menu
 
     def add_images(self):
@@ -171,3 +173,15 @@ class LabelingView(View["LabelingController"]):
             canvas.scale(tk.ALL, *canvas.get_containter_top_left(), scales[i], scales[i])
             canvas.imscale = scales[i]
             canvas.update_image()
+    
+    def check_labels(self):
+        if self.canvas is None: return
+        import matplotlib.pyplot as plt
+        kps = self.canvas.keypoint_manager.get_keypoints_coordinates()
+        x, y = [], []
+        for f, s in kps.values():
+            x.append(f)
+            y.append(s)
+        plt.imshow(self.canvas.image.pil_image)
+        plt.scatter(x, y)
+        plt.show()
