@@ -1,3 +1,4 @@
+from math import exp
 from tkinter import Menu
 from core.mvc.view import View
 import tkinter as tk
@@ -9,7 +10,7 @@ from core.models.image import ImageFile
 from core.models.skeleton import Skeleton
 from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft, webp_ft
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, Callable, List
 if TYPE_CHECKING:
     from .video_labeling_controller import LabelingController
 
@@ -17,9 +18,6 @@ class LabelingView(View["LabelingController"]):
     def __init__(self, controller: "LabelingController"):
         super().__init__(controller)
         self.setup_content_frame()
-        # Список изображений ImageFile
-        self.images_list: List[ImageFile] = []
-        
         # Список кнопок изображений
         self.img_buttons_list: List[tk.Button] = []
 
@@ -80,7 +78,7 @@ class LabelingView(View["LabelingController"]):
     def create_images_list_frame(self) -> VerticalScrolledFrame:
         config_frame = self.configuration_frame
         images_list = VerticalScrolledFrame(config_frame)
-        images_list.interior.grid_columnconfigure(0, weight=1)
+        #images_list.interior.grid_columnconfigure(0, weight=1, uniform="u")
         return images_list
     
     def add_image_to_images_list(self, image_path: str):
@@ -92,26 +90,30 @@ class LabelingView(View["LabelingController"]):
         if self.skeleton is not None: canvas.set_skeleton(self.skeleton)
         
         # Кнопка для открытия изображения
-        btn_image = tk.Button(
-            self.images_list_frame.interior, 
-            text=f"{image_path}", 
-            command=lambda: self.show_canvas(canvas),
-            anchor="e"
-        )
+        # btn_image = tk.Button(
+        #     self.images_list_frame.interior, 
+        #     text=f"{image_path}", 
+        #     command=lambda: self.show_canvas(canvas),
+        #     anchor="e"
+        # )
+        def delete_image(frame: ImageButtonFrame):
+            frame.pack_forget()
+            frame.destroy()
+            self.canvases.remove(canvas)
+            canvas.pack_forget()
+            canvas.destroy()
+
+        frm_image = ImageButtonFrame(self.images_list_frame.interior, 
+                                     image_path, 
+                                     lambda: self.show_canvas(canvas),
+                                     delete_image)
 
         # Добавляем всё в списки
-        self.images_list.append(image)
-        self.img_buttons_list.append(btn_image)
         self.canvases.append(canvas)
         self.total_images_number += 1
 
         # Отображаем
-        btn_image.grid(row=self.total_images_number, column=0, sticky="nsew")
-    
-    def remove_image_from_images_list(self, idx: int):
-        self.images_list.pop(idx)
-        self.canvases.pop(idx)
-        self.img_buttons_list.pop(idx).destroy()
+        frm_image.pack(fill=tk.BOTH)
 
     def show_canvas(self, canvas: LabelingCanvas):
         """Открыть и показать заданный `LabelingCanvas` в `Frame`-е для `LabelingCanvas`-ов"""
@@ -185,3 +187,24 @@ class LabelingView(View["LabelingController"]):
         plt.imshow(self.canvas.image.pil_image)
         plt.scatter(x, y)
         plt.show()
+
+class ImageButtonFrame(tk.Frame):
+    def __init__(self, 
+                 master, 
+                 image_path: str, 
+                 open_image_command: Callable,
+                 close_callback: Callable[["ImageButtonFrame"], Any]):
+        super().__init__(master)
+        btn_image = tk.Button(
+            self, 
+            text=f"{image_path}", 
+            command=open_image_command,
+            anchor="e",
+        )
+        btn_del = tk.Button(
+            self,
+            text = "X",
+            command=lambda:close_callback(self),
+        )
+        btn_del.pack(fill=tk.BOTH, side=tk.RIGHT)
+        btn_image.pack(fill=tk.BOTH, side=tk.RIGHT,  expand=True)
