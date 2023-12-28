@@ -1,4 +1,4 @@
-from core.view import View
+from core.mvc.view import View
 import tkinter as tk
 from tkinter import ttk
 

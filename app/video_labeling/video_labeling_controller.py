@@ -1,12 +1,14 @@
 from core.main_app_interface import MainAppMixin
-from core.view import View
-from core.controller import ControllerNavigator
+from core.mvc.view import View
+from core.mvc.controller import ControllerNavigator
 from .video_labeling_view import LabelingView
 import pandas as pd
-from core.skeleton import Skeleton
+from core.models.skeleton import Skeleton
 from tkinter.messagebox import showwarning
 from typing import List
 from .labeling_canvas import LabelingCanvas
+import os
+from core.filetypes import csv_ft, json_ft
 
 class LabelingController(ControllerNavigator):
     def __init__(self, root: MainAppMixin) -> None:
@@ -20,7 +22,7 @@ class LabelingController(ControllerNavigator):
         self.skeleton = Skeleton.read_skeleton_from_csv(file)
         return self.skeleton
 
-    def save_labels(self, canvases: List[LabelingCanvas], file):
+    def save_labels(self, canvases: List[LabelingCanvas], file: str):
         if self.skeleton is None: 
             showwarning("Скелет не был выбран", "Невозможно сохранить разметку, так как скелет не был выбран.")
             return
@@ -47,6 +49,13 @@ class LabelingController(ControllerNavigator):
         # Добавляем во все строки в первый столбец путь к изображению
         for i, row in enumerate(data):
             row.insert(0, canvases[i].image.image_path)
-            
+        # Создаём DF для удобного сохранения
         df = pd.DataFrame(data=data, columns=result_label_names)
-        df.to_csv(file, index=False, encoding="utf-16")
+
+        path, ext = os.path.splitext(file)
+        if ext in csv_ft[1]:
+            df.to_csv(file, index=False, encoding="utf-16")
+        elif ext in json_ft[1]:
+            df.to_json(file, force_ascii=False, orient='records')
+        else:
+            raise TypeError(f"Wrong file extension to save labels: {file}.")

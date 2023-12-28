@@ -4,11 +4,11 @@ from skeletor_creation.skeleton_controller import SkeletonController
 from video_labeling.video_labeling_controller import LabelingController
 from nn_learning.nn_learning_controller import LearningController
 from nn_inference.nn_inference_controller import InferenceController
-from core.navbar import Navbar
+from core.widgets.navbar import Navbar
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from core.view import View
+    from core.mvc.view import View
 
 try:
     from ctypes import windll

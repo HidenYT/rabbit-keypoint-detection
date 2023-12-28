@@ -1,4 +1,4 @@
-from core.skeleton import SkeletonNode, Skeleton
+from core.models.skeleton import SkeletonNode, Skeleton
 from typing import Dict, TYPE_CHECKING, List, Set
 
 if TYPE_CHECKING:

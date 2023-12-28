@@ -1,5 +1,5 @@
-from core.view import View
-from core.controller import ControllerNavigator
+from core.mvc.view import View
+from core.mvc.controller import ControllerNavigator
 from .nn_learning_view import LearningView
 
 class LearningController(ControllerNavigator):

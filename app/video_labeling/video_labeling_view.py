@@ -1,13 +1,13 @@
 from tkinter import Menu
-from core.view import View
+from core.mvc.view import View
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from core.scrollable_frame import VerticalScrolledFrame
+from core.widgets.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
-from core.image import ImageFile
-from core.skeleton import Skeleton
-from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft
+from core.models.image import ImageFile
+from core.models.skeleton import Skeleton
+from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft
 
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
@@ -150,17 +150,21 @@ class LabelingView(View):
                 canvas.set_skeleton(skeleton)
     
     def save_labels(self):
-        file = filedialog.asksaveasfile(defaultextension="", filetypes=[csv_ft])
-        if file is not None:
-            scales = []
-            for canvas in self.canvases:
-                s = canvas.imscale
-                scales.append(canvas.imscale)
-                canvas.scale(tk.ALL, *canvas.get_containter_top_left(), 1/s, 1/s)
-                canvas.imscale = 1
-                canvas.update_image()
-            self.controller.save_labels(self.canvases, file)
-            for i, canvas in enumerate(self.canvases):
-                canvas.scale(tk.ALL, *canvas.get_containter_top_left(), scales[i], scales[i])
-                canvas.imscale = scales[i]
-                canvas.update_image()
+        file = filedialog.asksaveasfilename(defaultextension="", filetypes=[csv_ft, json_ft])
+        if not file: return
+        # Запоминаем текущий масштаб на каждом канвасе в список scales
+        # и меняем масштаб на исходный, чтобы изображение было в исходную величину 
+        scales = []
+        for canvas in self.canvases:
+            s = canvas.imscale
+            scales.append(canvas.imscale)
+            canvas.scale(tk.ALL, *canvas.get_containter_top_left(), 1/s, 1/s)
+            canvas.imscale = 1
+            canvas.update_image()
+        # Сохраняем отметки
+        self.controller.save_labels(self.canvases, file)
+        # Возвращаем масштаб на каждом холсте, как было
+        for i, canvas in enumerate(self.canvases):
+            canvas.scale(tk.ALL, *canvas.get_containter_top_left(), scales[i], scales[i])
+            canvas.imscale = scales[i]
+            canvas.update_image()

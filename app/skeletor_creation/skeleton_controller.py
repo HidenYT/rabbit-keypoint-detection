@@ -1,10 +1,10 @@
 from typing import List, Tuple
 import tkinter as tk
 import pandas as pd
-from core.view import View
-from core.controller import ControllerNavigator
+from core.mvc.view import View
+from core.mvc.controller import ControllerNavigator
 from .skeleton_view import SkeletonEditWindow
-from core.skeleton import Skeleton
+from core.models.skeleton import Skeleton
 
 class SkeletonController(ControllerNavigator):
     def create_skeleton_csv(self, 

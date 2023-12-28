@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import Misc
 from typing import Dict
-from core.image import ImageFile
+from core.models.image import ImageFile
 from PIL import ImageTk
-from core.skeleton import Skeleton, SkeletonNode
+from core.models.skeleton import Skeleton, SkeletonNode
 from .keypoints import Keypoint, KeypointManager
 
 class LabelingCanvas(tk.Canvas):

@@ -1,7 +1,7 @@
 from typing import Dict
 import tkinter as tk
 from tkinter import ttk
-from core.view import View
+from core.mvc.view import View
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

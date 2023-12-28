@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import Menu, filedialog
 from typing import Callable, List, Tuple, TYPE_CHECKING
-from core.scrollable_frame import VerticalScrolledFrame
+from core.widgets.scrollable_frame import VerticalScrolledFrame
 import pandas as pd
-from core.view import View
+from core.mvc.view import View
 from tkinter import ttk
 from core.filetypes import csv_ft
 

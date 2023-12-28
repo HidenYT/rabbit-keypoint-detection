@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from .main_app_interface import MainAppMixin
-from .navbar import INavigator
+from core.main_app_interface import MainAppMixin
+from core.widgets.navbar import INavigator
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
