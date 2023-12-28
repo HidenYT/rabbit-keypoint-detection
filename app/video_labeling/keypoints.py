@@ -25,6 +25,7 @@ class KeypointManager:
         return ((kp.x-cont_x)/self.canvas.imscale, (kp.y-cont_y)/self.canvas.imscale)
 
     def add_keypoint(self, kp_id: int, kp_name: str):
+        if self.skeleton is None: raise Exception("Trying to add keypoint to the KeypointManager, but skeleton was not provided.")
         node = self.skeleton.nodes[kp_name]
         kp = Keypoint(self.canvas, kp_id, node)
         self.keypoint_by_id[kp_id] = kp
@@ -78,7 +79,7 @@ class KeypointManager:
         self.kp_id_by_name: Dict[str, int] = {}
         self.kp_text_by_kp_id: Dict[int, int] = {}
     
-    def get_kp_ids(self) -> Set[int]:
+    def get_kp_ids(self):
         return self.keypoint_by_id.keys()
     
     def get_text_ids(self) -> Set[int]:

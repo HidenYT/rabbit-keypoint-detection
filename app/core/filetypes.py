@@ -4,6 +4,8 @@ png_ft = ("PNG", [".png"])
 
 jpg_ft = ("JPEG", [".jpg", ".jpeg"])
 
-images_ft = ["Images", [".png", ".jpg", ".jpeg"]]
+images_ft = ("Images", [".png", ".jpg", ".jpeg"])
 
-json_ft = ["JSON", [".json"]]
+json_ft = ("JSON", [".json"])
+
+hd5_ft = ("Hierarchical Data Format (HDF)", [".hd5"])

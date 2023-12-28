@@ -21,7 +21,7 @@ class Controller(ABC):
         pass
 
 class ControllerNavigator(INavigator, Controller):
-    def __init__(self, root: MainAppMixin) -> None:
+    def __init__(self, root: "MainApp") -> None:
         super().__init__(root)
         self.navigator = root
     

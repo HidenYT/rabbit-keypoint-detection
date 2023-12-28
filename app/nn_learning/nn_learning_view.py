@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .nn_learning_controller import LearningController
 
-class LearningView(View):
+class LearningView(View["LearningController"]):
 
     # WINDOW_TITLE = "Обучение нейросети"
 

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .nn_inference_controller import InferenceController
 
-class InferenceView(View):
+class InferenceView(View["InferenceController"]):
 
     WINDOW_TITLE = "Запуск нейросети"
 

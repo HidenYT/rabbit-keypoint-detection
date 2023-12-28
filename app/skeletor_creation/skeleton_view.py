@@ -10,7 +10,7 @@ from core.filetypes import csv_ft
 if TYPE_CHECKING:
     from .skeleton_controller import SkeletonController
 
-class SkeletonEditWindow(View):
+class SkeletonEditWindow(View["SkeletonController"]):
     def __init__(self, controller: "SkeletonController") -> None:
         super().__init__(controller)
         self.focus_row = None
@@ -106,8 +106,8 @@ class SkeletonEditWindow(View):
             self.create_empty_table()
             df = self.controller.read_csv(f)
             for i in range(len(df)):
-                e1 = df.iloc[i, 0] if pd.notna(df.iloc[i, 0]) else ""
-                e2 = df.iloc[i, 1] if pd.notna(df.iloc[i, 1]) else ""
+                e1 = str(df.iloc[i, 0]) if pd.notna(df.iloc[i, 0]) else ""
+                e2 = str(df.iloc[i, 1]) if pd.notna(df.iloc[i, 1]) else ""
                 self.add_row(e1, e2)
         
     def create_csv(self):
@@ -120,8 +120,8 @@ class SkeletonEditWindow(View):
         self.frm_table.pack_forget()
         self.entries_table.clear()
         self.frm_table = frm_table = VerticalScrolledFrame(self)
-        frm_table.interior.grid_columnconfigure(0, weight=1, uniform=True)
-        frm_table.interior.grid_columnconfigure(1, weight=1, uniform=True)
+        frm_table.interior.grid_columnconfigure(0, weight=1, uniform="uniform")
+        frm_table.interior.grid_columnconfigure(1, weight=1, uniform="uniform")
         lbl_point_name = ttk.Label(frm_table.interior, text="Название точки",
                                    style="default.TLabel")
         lbl_point_name.grid(row=0, column=0)

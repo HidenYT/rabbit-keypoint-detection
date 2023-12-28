@@ -15,14 +15,14 @@ class Skeleton:
         if self.PARENT_NAME_FIELD not in skeleton_df.columns:
             raise SkeletonCSVFieldError(f"Столбец {self.PARENT_NAME_FIELD} не найден в csv файле.")
         for i in range(len(df)):
-            node_name = df.loc[i, self.KEYPOINT_NAME_FIELD]
+            node_name = str(df.loc[i, self.KEYPOINT_NAME_FIELD])
             node = SkeletonNode(node_name, None)
             self.nodes[node_name] = node
         # Добавляем вершинам родителей
         for i in range(len(df)):
-            node_name = df.loc[i, self.KEYPOINT_NAME_FIELD]
+            node_name = str(df.loc[i, self.KEYPOINT_NAME_FIELD])
             parent = df.loc[i, self.PARENT_NAME_FIELD]
-            parent_name =  parent if pd.notna(parent) else None 
+            parent_name =  str(parent) if pd.notna(parent) else None 
             if parent_name is not None:
                 self.nodes[node_name].parent = self.nodes[parent_name]
 
@@ -37,7 +37,7 @@ class Skeleton:
             df = pd.read_csv(file)
             return Skeleton(df)
         except SkeletonCSVFieldError as e:
-            showwarning("Ошибка при загрузке скелета", e)
+            showwarning("Ошибка при загрузке скелета", str(e))
         except KeyError as e:
             showwarning("Ошибка при загрузке скелета", f"Родительская точка {e} задана неверно.")
         except Exception as e:

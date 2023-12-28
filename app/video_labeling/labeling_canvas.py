@@ -56,7 +56,7 @@ class LabelingCanvas(tk.Canvas):
     #     self.img_id = self.create_image(self.coords(self.text), anchor='nw', image=self.imagetk)
     #     self.lower(self.img_id)
         
-    def find_closest_kp(self, x, y, halo = None) -> tuple[int, ...]:
+    def find_closest_kp(self, x, y, halo) -> tuple[int, ...]:
         x, y = self.canvasx(x), self.canvasy(y)
         objects = self.find_withtag(self.KP_TAG)
         def dist(kpid):
@@ -65,7 +65,7 @@ class LabelingCanvas(tk.Canvas):
         s = sorted(objects, key=dist)
         if s:
             closest = s[0]
-            if dist(closest) <= halo*self.imscale:
+            if dist(closest) <= halo:
                 return tuple([s[0]])
         return tuple()
         

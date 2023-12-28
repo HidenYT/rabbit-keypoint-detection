@@ -7,13 +7,13 @@ from core.widgets.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
 from core.models.image import ImageFile
 from core.models.skeleton import Skeleton
-from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft
+from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft
 
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from .video_labeling_controller import LabelingController
 
-class LabelingView(View):
+class LabelingView(View["LabelingController"]):
     def __init__(self, controller: "LabelingController"):
         super().__init__(controller)
         self.setup_content_frame()
@@ -54,9 +54,9 @@ class LabelingView(View):
         self.configuration_frame = tk.Frame(self)
         self.setup_config_frame()
 
-        self.grid_columnconfigure(0, weight=3, uniform=True)
-        self.grid_columnconfigure(1, weight=2, uniform=True)
-        self.grid_rowconfigure(0, weight=1, uniform=True)
+        self.grid_columnconfigure(0, weight=3, uniform="uniform")
+        self.grid_columnconfigure(1, weight=2, uniform="uniform")
+        self.grid_rowconfigure(0, weight=1)
         self.canvas_frame.grid(row=0, column=0, sticky="nsew")
         self.configuration_frame.grid(row=0, column=1, sticky="nsew")
 
@@ -70,9 +70,9 @@ class LabelingView(View):
         # Frame для всех кнопок, находится внизу
         action_menu = self.create_action_menu()
         
-        config_frame.grid_rowconfigure(0, weight=1, uniform=True)
-        config_frame.grid_rowconfigure(1, weight=1, uniform=True)
-        config_frame.grid_columnconfigure(0, weight=1)
+        config_frame.grid_rowconfigure(0, weight=1, uniform="uniform")
+        config_frame.grid_rowconfigure(1, weight=1, uniform="uniform")
+        config_frame.grid_columnconfigure(0, weight=1, uniform="uniform")
         images_list.grid(row=0, column=0, sticky="news")
         action_menu.grid(row=1, column=0, sticky="news")
 
@@ -80,7 +80,7 @@ class LabelingView(View):
     def create_images_list_frame(self) -> VerticalScrolledFrame:
         config_frame = self.configuration_frame
         images_list = VerticalScrolledFrame(config_frame)
-        images_list.interior.grid_columnconfigure(0, weight=1, uniform=True)
+        images_list.interior.grid_columnconfigure(0, weight=1)
         return images_list
     
     def add_image_to_images_list(self, image_path: str):
@@ -150,7 +150,10 @@ class LabelingView(View):
                 canvas.set_skeleton(skeleton)
     
     def save_labels(self):
-        file = filedialog.asksaveasfilename(defaultextension="", filetypes=[csv_ft, json_ft])
+        file = filedialog.asksaveasfilename(
+            defaultextension="", 
+            filetypes=[csv_ft, json_ft, hd5_ft]
+        )
         if not file: return
         # Запоминаем текущий масштаб на каждом канвасе в список scales
         # и меняем масштаб на исходный, чтобы изображение было в исходную величину 

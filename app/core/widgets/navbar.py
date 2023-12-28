@@ -53,5 +53,5 @@ class Navbar(tk.Frame):
             btn_nn_inference,
         ]
         for i in range(len(btns)):
-            self.columnconfigure(i, weight=1, uniform=True)
+            self.columnconfigure(i, weight=1, uniform="uniform")
             btns[i].grid(row=0, column=i, sticky="nswe")

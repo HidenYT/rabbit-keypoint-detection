@@ -1,24 +1,26 @@
-from core.main_app_interface import MainAppMixin
 from core.mvc.view import View
 from core.mvc.controller import ControllerNavigator
 from .video_labeling_view import LabelingView
 import pandas as pd
 from core.models.skeleton import Skeleton
 from tkinter.messagebox import showwarning
-from typing import List
+from typing import List, TYPE_CHECKING
 from .labeling_canvas import LabelingCanvas
 import os
-from core.filetypes import csv_ft, json_ft
+from core.filetypes import csv_ft, json_ft, hd5_ft
+import h5py
+if TYPE_CHECKING:
+    from main_app import MainApp
 
 class LabelingController(ControllerNavigator):
-    def __init__(self, root: MainAppMixin) -> None:
+    def __init__(self, root: "MainApp") -> None:
         super().__init__(root)
         self.skeleton: Skeleton | None = None
 
     def create_view(self) -> View:
         return LabelingView(self)
     
-    def open_skeleton(self, file) -> Skeleton:
+    def open_skeleton(self, file) -> Skeleton | None:
         self.skeleton = Skeleton.read_skeleton_from_csv(file)
         return self.skeleton
 
@@ -57,5 +59,8 @@ class LabelingController(ControllerNavigator):
             df.to_csv(file, index=False, encoding="utf-16")
         elif ext in json_ft[1]:
             df.to_json(file, force_ascii=False, orient='records')
+        elif ext in hd5_ft[1]:
+            pass
+            #df.to_hdf(file, key="labels")
         else:
             raise TypeError(f"Wrong file extension to save labels: {file}.")
