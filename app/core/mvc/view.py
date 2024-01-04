@@ -14,7 +14,6 @@ class View(ABC, tk.Frame, Generic[T]):
     def __init__(self, controller: T) -> None:
         super().__init__(controller.root.free_space)
         self.controller = controller
-        self.content_frame = tk.Frame(self)
 
     @abstractmethod
     def create_menu(self) -> tk.Menu:
