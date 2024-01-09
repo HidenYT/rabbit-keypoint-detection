@@ -55,8 +55,7 @@ class FramesSelectionView(View["FramesSelectionController"], VideoFrameChangeLis
 
     def on_video_frame_change_complete(self, frame_n: int):
         img = self.controller.get_video_frame(frame_n)
-        if img is not None:
-            self.video_frame.set_image(img)
+        if img is not None: self.video_frame.set_image(img)
 
 
 
@@ -69,6 +68,7 @@ class VideoFrame(tk.Frame):
 
         self.frames_n = frames_n
         self.frame_change_listener = frame_change_listener
+        self.playing = False
         
         self.video_frame = self.setup_video_frame()
         self.bottom_bar = self.setup_bottom_bar()
@@ -77,7 +77,7 @@ class VideoFrame(tk.Frame):
     
     def set_frames_n(self, frames_n: int):
         self.frames_n = frames_n
-        self.scale.config(to=frames_n-1)
+        self.scale.config(to=frames_n-1, value=0)
 
     def set_frame_change_listener(self, listener: VideoFrameChangeListener):
         self.frame_change_listener = listener
@@ -125,7 +125,13 @@ class VideoFrame(tk.Frame):
         self.scale = scale = ttk.Scale(frm, from_=0, to=self.frames_n-1, value=0, command=self.on_scale_changed)
         scale.bind("<ButtonRelease-1>", self.on_scale_changing_complete)
 
-        scale.pack(fill='both', side='bottom', expand=True)
+        scale.pack(fill='both', side='left', expand=True)
+
+        btn_play = ttk.Button(frm, text="Play", command=self.play_video)
+        btn_pause = ttk.Button(frm, text="Pause", command=self.pause_video)
+
+        btn_play.pack(side='left')
+        btn_pause.pack(side='left')
         return frm
     
     def on_scale_changed(self, value: str):
@@ -135,6 +141,26 @@ class VideoFrame(tk.Frame):
 
     def on_scale_changing_complete(self, event):
         frame_n = int(round(float(self.scale.get())))
-        if self.frame_change_listener is not None:
+        if self.frame_change_listener is not None and not self.playing:
             self.frame_change_listener.on_video_frame_change_complete(frame_n)
+        
+    def play_video(self):
+        if self.playing: return
+        self.scale.config(state="disabled")
+        self.playing = True
+        from threading import Thread
+        Thread(target=self.pl).start()
+
+    def pause_video(self):
+        self.scale.config(state="normal")
+        self.playing = False
+
+    def pl(self):
+        if self.frame_change_listener is None: return
+
+        cur_frame = int(round(float(self.scale.get())))
+        while self.playing and cur_frame < self.frames_n:
+            self.frame_change_listener.on_video_frame_change_complete(cur_frame)
+            self.scale.config(value=cur_frame)
+            cur_frame += 1
         
