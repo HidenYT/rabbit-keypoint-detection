@@ -1,4 +1,5 @@
 import tkinter as tk
+from frames_selection.frames_selection_controller import FramesSelectionController
 from core.main_app_interface import MainAppMixin
 from skeletor_creation.skeleton_controller import SkeletonController
 from video_labeling.video_labeling_controller import LabelingController
@@ -32,7 +33,8 @@ class MainApp(MainAppMixin):
         #self.go_to_skeleton_creation()
     
     def go_to_frames_creation(self):
-        pass
+        self.show_view(FramesSelectionController(self).create_view())
+        self.current_controller = FramesSelectionController
 
     def go_to_skeleton_creation(self):
         self.show_view(SkeletonController(self).create_view())
@@ -51,5 +53,3 @@ class MainApp(MainAppMixin):
         self.frame.pack_forget()
         self.frame = view
         view.pack(fill="both", expand=True)
-        menu = view.create_menu()
-        #self.configure(menu = menu)

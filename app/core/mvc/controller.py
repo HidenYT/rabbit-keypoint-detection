@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from core.main_app_interface import MainAppMixin
 from core.widgets.navbar import INavigator
 
 from typing import TYPE_CHECKING

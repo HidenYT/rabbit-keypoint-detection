@@ -11,3 +11,9 @@ json_ft = ("JSON", [".json"])
 hd5_ft = ("Hierarchical Data Format (HDF)", [".hd5"])
 
 webp_ft = ("WEBP", [".webp"])
+
+mp4_ft = ("mp4", [".mp4", ".m4a", ".m4p", ".m4b", ".m4r", ".m4v"])
+
+avi_ft = ("AVI", [".avi"])
+
+videos_ft = ("Videos", mp4_ft[1] + avi_ft[1])

@@ -14,8 +14,3 @@ class View(ABC, tk.Frame, Generic[T]):
     def __init__(self, controller: T) -> None:
         super().__init__(controller.root.free_space)
         self.controller = controller
-
-    @abstractmethod
-    def create_menu(self) -> tk.Menu:
-        '''Метод должен возвращать меню `Menu` данного представления.'''
-        pass
