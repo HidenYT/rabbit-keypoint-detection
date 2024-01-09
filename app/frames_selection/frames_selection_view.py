@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
 import cv2
+from numpy import delete
 from core.mvc.view import View
 from core.filetypes import videos_ft
 
@@ -86,28 +87,38 @@ class VideoFrame(tk.Frame):
 
     def setup_video_frame(self) -> tk.Frame:
         frm = tk.Frame(self)
-        self.canvas = image = tk.Canvas(frm)
-        image.pack(fill='both', expand=True)
+        self.canvas = canvas = tk.Canvas(frm)
+        canvas.pack(fill='both', expand=True)
         return frm
     
     def set_image(self, pil_img: Image.Image):
-        self.canvas.pack_forget()
-        photo_img = ImageTk.PhotoImage(pil_img)
-        self.canvas = tk.Canvas(self.video_frame)
-        self.master.update()
+        self.pil_img = pil_img
         self.canvas_w, self.canvas_h = self.canvas.winfo_width(), self.canvas.winfo_height()
+        self.photo_img = photo_img = ImageTk.PhotoImage(pil_img.resize(self.calculate_good_img_size()))
         self.canvas.bind("<Configure>", lambda x: self.canvas_config())
-        self.container = self.canvas.create_rectangle(0, 0, self.canvas_w, self.canvas_h, width=10)
-        self.image = self.canvas.create_image(0, 0, anchor="nw", image=photo_img)
-        self.photo_img = photo_img
-        self.canvas.pack(fill='both', expand=True)
+        self.image = self.canvas.create_image(*self.calculate_good_img_position(), anchor="nw", image=photo_img)
 
     def canvas_config(self):
-        self.master.update()
         self.canvas_w, self.canvas_h = self.canvas.winfo_width(), self.canvas.winfo_height()
-        self.canvas.delete(self.container)
-        self.container = self.canvas.create_rectangle(0, 0, self.canvas_w, self.canvas_h, width=10)
-        self.image = self.canvas.create_image(0, 0, anchor="nw", image=self.photo_img)
+        self.photo_img = ImageTk.PhotoImage(self.pil_img.resize(self.calculate_good_img_size()))
+        self.image = self.canvas.create_image(*self.calculate_good_img_position(), anchor="nw", image=self.photo_img)
+
+    def calculate_good_img_size(self) -> Tuple[int, int]:
+        ratio = self.pil_img.width/self.pil_img.height
+        result_w, result_h = self.pil_img.size
+        if result_w > self.canvas_w:
+            result_w = self.canvas_w
+            result_h = result_w/ratio
+        if result_h > self.canvas_h:
+            result_h = self.canvas_h
+            result_w = ratio * result_h
+        return int(result_w), int(result_h)
+    
+    def calculate_good_img_position(self):
+        img_sz = self.calculate_good_img_size()
+        mid_canv = self.canvas_h/2
+        mid_img = img_sz[1]/2
+        return 0, int(mid_canv-mid_img)
 
     def setup_bottom_bar(self) -> tk.Frame:
         self.bottom_frame = frm = tk.Frame(self)
