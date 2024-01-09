@@ -29,3 +29,25 @@ class FramesSelectionController(ControllerNavigator):
             raise IndexError(f"Frame #{n} can not be extracted from the video.")
         img = cv.cvtColor(frm, cv.COLOR_BGR2RGB)
         return Image.fromarray(img)
+    
+    def get_next_video_frame(self) -> Image.Image | None:
+        if self.video_capture is None: return None
+        ret, frm = self.video_capture.read()
+        if ret: 
+            img = cv.cvtColor(frm, cv.COLOR_BGR2RGB)
+            return Image.fromarray(img)
+        return None 
+
+    def get_video_fps(self) -> int | None:
+        if self.video_capture is not None: 
+            return int(self.video_capture.get(cv.CAP_PROP_FPS))
+        return None
+    
+    def get_video_frame_n(self) -> int | None:
+        if self.video_capture is not None:
+            return int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))
+        return None
+
+    def __del__(self):
+        if self.video_capture is not None:
+            self.video_capture.release()
