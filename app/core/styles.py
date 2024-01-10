@@ -22,3 +22,6 @@ selected_skeleton_table_cell.configure("selected_skeleton_table_cell.TEntry",
                  padding=10,)
 
 skeleton_table_cell_font = ('Helvetica', 10)
+
+ttk.Style().configure("selection_selected.TButton", foreground="green")
+ttk.Style().configure("selection_notselected.TButton", foreground="red")

@@ -1,9 +1,9 @@
-from shutil import move
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image
+from frames_selection.frames_selection_manager import FramesSelectionManager
 from .video_frame_canvas import VideoFrameCanvas
 from .video_frame_change_listener import VideoFrameChangeListener
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .frames_selection_controller import FramesSelectionController
@@ -14,12 +14,14 @@ class VideoFrame(tk.Frame):
     def __init__(self, 
                  master,
                  controller: "FramesSelectionController", 
-                 frames_n: int = 100, 
-                 frame_change_listener: VideoFrameChangeListener | None = None):
+                 frame_selection_manager: "FramesSelectionManager",
+                 frame_change_listener: VideoFrameChangeListener,
+                 frames_n: int = 100, ):
         super().__init__(master)
         self.controller = controller
 
         self.frames_n = frames_n
+        self.frame_selection_manager = frame_selection_manager
         self.frame_change_listener = frame_change_listener
         self.playing = False
         
@@ -31,12 +33,6 @@ class VideoFrame(tk.Frame):
     def set_frames_n(self, frames_n: int):
         self.frames_n = frames_n
         self.slider.config(to=frames_n-1, value=0)
-
-    def set_frame_change_listener(self, listener: VideoFrameChangeListener):
-        self.frame_change_listener = listener
-
-    def remove_frame_change_listener(self):
-        self.frame_change_listener = None
 
     def setup_video_frame(self) -> tk.Frame:
         frm = tk.Frame(self)
@@ -88,8 +84,14 @@ class VideoFrame(tk.Frame):
         frm = tk.Frame(root)
         btn_play = ttk.Button(frm, text="Play", command=self.play_video)
         btn_pause = ttk.Button(frm, text="Pause", command=self.pause_video)
+        self.btn_select = tk.Button(frm, 
+                                    text="Выбрать", 
+                                    command=self.toggle_current_frame_selection,
+                                    bg='red',
+                                    relief='flat')
         btn_play.pack(side='left', fill='both', expand=True)
-        btn_pause.pack(side='right', fill='both', expand=True)
+        btn_pause.pack(side='left', fill='both', expand=True)
+        self.btn_select.pack(side='left', fill='both', expand=True)
         return frm
     
     def on_slider_changed(self, value: str):
@@ -103,6 +105,7 @@ class VideoFrame(tk.Frame):
         if self.frame_change_listener is not None and not self.playing:
             self.frame_change_listener.on_video_frame_change_complete(frame_n)
             self.frame_n_label.config(text=str(frame_n))
+            self.update_select_button_bg()
         
     def play_video(self):
         if self.playing: return
@@ -118,6 +121,7 @@ class VideoFrame(tk.Frame):
                 return
             self.canvas.set_image(img)
             self.update_frame_n_info()
+            self.update_select_button_bg()
             self.master.after(delay, play)
         self.disable_control()
         self.playing = True
@@ -129,8 +133,9 @@ class VideoFrame(tk.Frame):
 
     def update_frame_n_info(self):
         if self.controller.get_video_frame_n() is None: return
-        self.frame_n_label.config(text=str(self.controller.get_video_frame_n()))
-        self.slider.config(value=self.controller.get_video_frame_n())
+        self.frame_n_label.config(text=str(self.controller.get_video_frame_n()-1))
+        self.slider.config(value=self.controller.get_video_frame_n()-1)
+        self.update_select_button_bg()
     
     def set_video_pos(self, pos: int):
         pos = max(0, min(pos, self.frames_n-1))
@@ -150,3 +155,19 @@ class VideoFrame(tk.Frame):
         self.slider.config(state='normal')
         self.btn_slider_left.config(state='normal')
         self.btn_slider_right.config(state='normal')
+
+    def toggle_current_frame_selection(self):
+        frame_n = int(round(float(self.slider.get())))
+        self.frame_selection_manager.toggle(frame_n)
+        self.update_select_button_bg()
+
+    def set_image(self, img: Image.Image):
+        self.update_frame_n_info()
+        self.canvas.set_image(img)
+
+    def update_select_button_bg(self):
+        frame_n = int(round(float(self.slider.get())))
+        if self.frame_selection_manager.selected(frame_n):
+            self.btn_select.config(bg='green')
+        else:
+            self.btn_select.config(bg='red')
