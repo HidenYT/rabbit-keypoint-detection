@@ -6,10 +6,8 @@ import tkinter as tk
 class VideoFrameCanvas(tk.Canvas):
     def set_image(self, pil_img: Image.Image):
         self.pil_img = pil_img
-        self.canvas_w, self.canvas_h = self.winfo_width(), self.winfo_height()
-        self.photo_img = photo_img = ImageTk.PhotoImage(pil_img.resize(self.calculate_good_img_size()))
+        self.canvas_config()
         self.bind("<Configure>", lambda x: self.canvas_config())
-        self.image = self.create_image(*self.calculate_good_img_position(), anchor="nw", image=photo_img)
     
     def canvas_config(self):
         self.canvas_w, self.canvas_h = self.winfo_width(), self.winfo_height()
