@@ -5,10 +5,9 @@ from .video_frame_change_listener import VideoFrameChangeListener
 from .video_frame import VideoFrame
 from core.mvc.view import View
 from core.filetypes import videos_ft
-
-
 if TYPE_CHECKING:
     from .frames_selection_controller import FramesSelectionController
+
 
 class FramesSelectionView(View["FramesSelectionController"], VideoFrameChangeListener):
     def __init__(self, controller: "FramesSelectionController") -> None:
