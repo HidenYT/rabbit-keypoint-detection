@@ -29,7 +29,9 @@ class VideoFrameCanvas(tk.Canvas):
 
     def calculate_good_img_position(self):
         img_sz = self.calculate_good_img_size()
-        mid_canv = self.canvas_h/2
-        mid_img = img_sz[1]/2
-        return 0, int(mid_canv-mid_img)
+        mid_w_canv = self.canvas_w/2
+        mid_w_img = img_sz[0]/2
+        mid_h_canv = self.canvas_h/2
+        mid_h_img = img_sz[1]/2
+        return int(mid_w_canv-mid_w_img), int(mid_h_canv-mid_h_img)
     
