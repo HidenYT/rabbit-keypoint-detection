@@ -1,6 +1,9 @@
 from typing import TYPE_CHECKING
+from datetime import date, datetime
+import os
 import cv2 as cv
 from PIL import Image
+from frames_selection.frames_selection_manager import FramesSelectionManager
 from core.mvc.view import View
 from core.mvc.controller import ControllerNavigator
 from .frames_selection_view import FramesSelectionView
@@ -51,3 +54,21 @@ class FramesSelectionController(ControllerNavigator):
     def __del__(self):
         if self.video_capture is not None:
             self.video_capture.release()
+
+    def save_frames(self, frames_selection_manager: FramesSelectionManager, directory_path):
+        if self.video_capture is None: return
+        tmp_pos = int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))-1
+        print(repr(directory_path))
+        self.video_capture.set(cv.CAP_PROP_POS_FRAMES, 0)
+        ret, frm = self.video_capture.read()
+        frm_idx = 0
+        dt_str = datetime.strftime(datetime.now(), "%d.%m.%Y_%H.%M.%S")
+        file_name = "Selected_frames_" + dt_str + "_frame_{}.jpg"
+        while ret:
+            if frames_selection_manager.selected(frm_idx):
+                frm_name = file_name.format(frm_idx)
+                print(os.path.join(directory_path, frm_name))
+                cv.imwrite(os.path.join(directory_path, frm_name), frm)
+            ret, frm = self.video_capture.read()
+            frm_idx += 1
+        self.video_capture.set(cv.CAP_PROP_POS_FRAMES, tmp_pos)

@@ -1,3 +1,4 @@
+import os
 from typing import TYPE_CHECKING
 import tkinter as tk
 from tkinter import ttk, filedialog
@@ -33,10 +34,12 @@ class FramesSelectionView(View["FramesSelectionController"],
 
     def setup_left_panel(self) -> tk.Frame:
         frm = tk.Frame(self)
-        btn_choose_video = ttk.Button(frm, text="Открыть видео", command=self.on_open_video)
-        btn_choose_video.pack(fill="x")
         self.frm_selected_frames = SelectedFramesFrame(frm, self)
         self.frm_selected_frames.pack(fill='both', expand=True)
+        btn_choose_video = ttk.Button(frm, text="Открыть видео", command=self.on_open_video)
+        btn_choose_video.pack(fill="x", side='bottom')
+        btn_save = ttk.Button(frm, text="Сохранить кадры", command=self.save_selected_frames)
+        btn_save.pack(fill='x', side='bottom')
         return frm
     
     def on_open_video(self):
@@ -64,3 +67,8 @@ class FramesSelectionView(View["FramesSelectionController"],
     
     def on_removed(self, frame_idx: int):
         self.frm_selected_frames.remove_frame(frame_idx)
+
+    def save_selected_frames(self):
+        dir = filedialog.askdirectory().replace("/", os.sep)
+        if dir:
+            self.controller.save_frames(self.frames_selection_manager, dir)
