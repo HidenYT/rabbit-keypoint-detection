@@ -48,6 +48,7 @@ class FramesSelectionView(View["FramesSelectionController"],
             filetypes=[videos_ft]
         )
         if not file: return
+        self.frames_selection_manager.clear()
         frames_n = self.controller.open_video(file)
         self.video_frame.set_frames_n(frames_n)
         self.on_video_frame_change_complete(0)
@@ -72,3 +73,6 @@ class FramesSelectionView(View["FramesSelectionController"],
         dir = filedialog.askdirectory().replace("/", os.sep)
         if dir:
             self.controller.save_frames(self.frames_selection_manager, dir)
+
+    def on_selection_clear(self):
+        self.frm_selected_frames.remove_all_frames()

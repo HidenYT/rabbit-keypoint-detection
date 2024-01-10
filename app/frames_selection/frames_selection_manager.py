@@ -7,6 +7,9 @@ class FrameSelectionListener(ABC):
     @abstractmethod
     def on_removed(self, frame_idx: int): pass
 
+    @abstractmethod
+    def on_selection_clear(self): pass
+
 class FramesSelectionManager:
 
     def __init__(self, frame_selection_listener: FrameSelectionListener) -> None:
@@ -29,3 +32,7 @@ class FramesSelectionManager:
             self.remove(frame_idx)
         else:
             self.select(frame_idx)
+
+    def clear(self):
+        self.selected_frames.clear()
+        self.listener.on_selection_clear()

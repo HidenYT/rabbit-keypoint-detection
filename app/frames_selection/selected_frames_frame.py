@@ -23,6 +23,7 @@ class SelectedFramesFrame(VerticalScrolledFrame):
     def remove_frame(self, frame_n: int):
         btn = self.frame_buttons[frame_n]
         btn.destroy()
+        del self.frame_buttons[frame_n]
 
     def redraw_buttons(self):
         btns = sorted(list(self.frame_buttons.items()))
@@ -30,3 +31,8 @@ class SelectedFramesFrame(VerticalScrolledFrame):
             btn[1].pack_forget()
         for btn in btns:
             btn[1].pack(fill='x', expand=True)
+    
+    def remove_all_frames(self):
+        for btn in self.frame_buttons.values():
+            btn.destroy()
+        self.frame_buttons.clear()
