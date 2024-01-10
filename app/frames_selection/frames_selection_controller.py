@@ -21,7 +21,7 @@ class FramesSelectionController(ControllerNavigator):
         self.video_capture = cv.VideoCapture(file_path)
         return int(self.video_capture.get(cv.CAP_PROP_FRAME_COUNT))
     
-    def get_video_frame(self, n: int) -> Image.Image | None:
+    def set_video_frame(self, n: int) -> Image.Image | None:
         if self.video_capture is None: return None
         self.video_capture.set(cv.CAP_PROP_POS_FRAMES, n)
         ret, frm = self.video_capture.read()

@@ -17,9 +17,16 @@ class SelectedFramesFrame(VerticalScrolledFrame):
         btn_frame = ttk.Button(self.interior,
                                text=str(frame_n),
                                command=choose_frame)
-        btn_frame.pack(fill='x', expand=True)
         self.frame_buttons[frame_n] = btn_frame
+        self.redraw_buttons()
 
     def remove_frame(self, frame_n: int):
         btn = self.frame_buttons[frame_n]
         btn.destroy()
+
+    def redraw_buttons(self):
+        btns = sorted(list(self.frame_buttons.items()))
+        for btn in btns:
+            btn[1].pack_forget()
+        for btn in btns:
+            btn[1].pack(fill='x', expand=True)

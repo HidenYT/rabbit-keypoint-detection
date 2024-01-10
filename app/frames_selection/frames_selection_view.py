@@ -53,7 +53,7 @@ class FramesSelectionView(View["FramesSelectionController"],
         pass
 
     def on_video_frame_change_complete(self, frame_n: int):
-        img = self.controller.get_video_frame(frame_n)
+        img = self.controller.set_video_frame(frame_n)
         if img is not None: self.video_frame.set_image(img)
 
     def on_frame_selection_toggle(self, frame_idx: int):
