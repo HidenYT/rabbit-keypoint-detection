@@ -1,10 +1,13 @@
 import os
 from tkinter import messagebox
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable, List, Tuple
 import tkinter as tk
 from tkinter import ttk, filedialog
+import numpy as np
+from .auto_frames_selection.auto_selector import FramesSource
+from .auto_frames_selection.auto_selection_window import AutoFrameSelectionWindow
 from frames_selection.selected_frames_frame import SelectedFramesFrame
-from frames_selection.frames_selection_manager import FrameSelectionListener, FramesSelectionManager
+from frames_selection.frames_selection_manager import FramesSelectionManager
 from .video_frame_change_listener import VideoFrameChangeListener
 from .video_frame import VideoFrame
 from core.mvc.view import View
@@ -14,7 +17,8 @@ if TYPE_CHECKING:
 
 
 class FramesSelectionView(View["FramesSelectionController"], 
-                          VideoFrameChangeListener):
+                          VideoFrameChangeListener,
+                          FramesSource):
     def __init__(self, controller: "FramesSelectionController") -> None:
         super().__init__(controller)
         self.setup_content_frame()
@@ -42,7 +46,14 @@ class FramesSelectionView(View["FramesSelectionController"],
         btn_choose_video.pack(fill="x", side='bottom')
         btn_save = ttk.Button(frm, text="Сохранить кадры", command=self.save_selected_frames)
         btn_save.pack(fill='x', side='bottom')
+        
+        btn_auto_select = ttk.Button(frm, text="Автоматическая выборка", command=self.open_auto_selection_window)
+        btn_auto_select.pack(fill='x', side='bottom')
         return frm
+    
+    def open_auto_selection_window(self):
+        if self.controller.video_capture is None: return
+        AutoFrameSelectionWindow(self, self.video_frame.frames_n, self, self.frames_selection_manager).mainloop()
     
     def on_open_video(self):
         file = filedialog.askopenfilename(
@@ -67,3 +78,15 @@ class FramesSelectionView(View["FramesSelectionController"],
                 messagebox.showinfo("Сохранение", "Файлы были успешно сохранены.")
             else:
                 messagebox.showerror("Сохранение", "При сохранении произошла ошибка.")
+
+    def get_frames_by_indicies(self, indicies: Iterable[int]) -> List[np.ndarray]:
+        current_cap_idx = self.controller.get_showing_frame_n()+1
+        result: List[np.ndarray] = []
+        for idx in indicies:
+            self.controller.set_video_frame(idx)
+            img = self.controller.get_current_frame()
+            if img is None: 
+                raise Exception(f"Image at index {idx} is not available.")
+            result.append(np.asarray(img))
+        self.controller.set_video_frame(current_cap_idx)
+        return result
