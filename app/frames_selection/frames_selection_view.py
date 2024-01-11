@@ -14,16 +14,14 @@ if TYPE_CHECKING:
 
 
 class FramesSelectionView(View["FramesSelectionController"], 
-                          VideoFrameChangeListener,
-                          FrameSelectionListener):
+                          VideoFrameChangeListener):
     def __init__(self, controller: "FramesSelectionController") -> None:
         super().__init__(controller)
-        self.frames_selection_manager = FramesSelectionManager(self)
         self.setup_content_frame()
 
     def setup_content_frame(self):
-        self.video_frame = self.setup_video_frame()
         self.right_panel = self.setup_left_panel()
+        self.video_frame = self.setup_video_frame()
         self.video_frame.pack(side='left', fill='both', expand=True, padx=10, pady=10)
         self.right_panel.pack(side='right', fill='both', expand=True)
 
@@ -38,6 +36,7 @@ class FramesSelectionView(View["FramesSelectionController"],
         lbl_info = tk.Label(frm, text="Выбранные кадры")
         lbl_info.pack(fill='x')
         self.frm_selected_frames = SelectedFramesFrame(frm, self)
+        self.frames_selection_manager = FramesSelectionManager(self.frm_selected_frames)
         self.frm_selected_frames.pack(fill='both', expand=True)
         btn_choose_video = ttk.Button(frm, text="Открыть видео", command=self.on_open_video)
         btn_choose_video.pack(fill="x", side='bottom')
@@ -60,12 +59,6 @@ class FramesSelectionView(View["FramesSelectionController"],
         self.controller.set_video_frame(frame_n)
         self.video_frame.update_frame()
 
-    def on_selected(self, frame_idx: int):
-        self.frm_selected_frames.select_frame(frame_idx)
-    
-    def on_removed(self, frame_idx: int):
-        self.frm_selected_frames.remove_frame(frame_idx)
-
     def save_selected_frames(self):
         dir = filedialog.askdirectory().replace("/", os.sep)
         if dir:
@@ -74,6 +67,3 @@ class FramesSelectionView(View["FramesSelectionController"],
                 messagebox.showinfo("Сохранение", "Файлы были успешно сохранены.")
             else:
                 messagebox.showerror("Сохранение", "При сохранении произошла ошибка.")
-
-    def on_selection_clear(self):
-        self.frm_selected_frames.remove_all_frames()
