@@ -7,7 +7,7 @@ from tkinter import filedialog
 from core.widgets.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
 from core.models.image import ImageFile
-from core.models.skeleton import Skeleton
+from core.models.skeleton import DefaultSkeleton, Skeleton
 from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft, webp_ft
 
 from typing import TYPE_CHECKING, Any, Callable, List
@@ -29,20 +29,6 @@ class LabelingView(View["LabelingController"]):
 
         # Скелет
         self.skeleton: Skeleton | None = None
-    
-    def create_menu(self) -> Menu:
-        menu = tk.Menu(self.controller.root)
-        file_menu = tk.Menu(menu, tearoff=0)
-        file_menu.add_command(label="Выбрать кадры вручную")
-        file_menu.add_command(label="Автоматический выбор кадров")
-        file_menu.add_command(label="Выбрать скелет")
-        file_menu.add_command(label="Сохранить всё")
-        file_menu.add_command(label="Сохранить кадры")
-        file_menu.add_command(label="Сохранить разметку json")
-        file_menu.add_command(label="Сохранить разметку csv")
-        file_menu.add_command(label="Сохранить разметку h5")
-        menu.add_cascade(label="Файл", menu=file_menu)
-        return menu
     
     def setup_content_frame(self):
         # Frame для LabelingCanvas, находится слева
@@ -89,13 +75,6 @@ class LabelingView(View["LabelingController"]):
         # Отображаем скелет, если он есть
         if self.skeleton is not None: canvas.set_skeleton(self.skeleton)
         
-        # Кнопка для открытия изображения
-        # btn_image = tk.Button(
-        #     self.images_list_frame.interior, 
-        #     text=f"{image_path}", 
-        #     command=lambda: self.show_canvas(canvas),
-        #     anchor="e"
-        # )
         def delete_image(frame: ImageButtonFrame):
             frame.pack_forget()
             frame.destroy()

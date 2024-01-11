@@ -50,3 +50,33 @@ class SkeletonNode:
     def __init__(self, name: str, parent: Union["SkeletonNode", None]) -> None:
         self.name = name
         self.parent = parent
+
+class DefaultSkeleton(Skeleton):
+    def __init__(self) -> None:
+        keypoints = [
+            ["Head", None],
+            ["Eye left", None],
+            ["Eye right", None],
+            ["Mouth part 1", None],
+            ["Mouth part 2", None],
+            ["Mouth part 3", None],
+            ["Mouth part 4", None],
+            ["Shoulder left", None],
+            ["Shoulder right", None],
+            ["Elbow right", None],
+            ["Elbow left", None],
+            ["Wrist left", None],
+            ["Wrist right", None],
+            ["Mid torso", None],
+            ["Hip left", None],
+            ["Hip right", None],
+            ["Knee left", None],
+            ["Knee right", None],
+            ["Ankle left", None],
+            ["Ankle right", None],
+            ["Tail part 1", None],
+            ["Tail part 2", None],
+            ["Tail part 3", None],
+        ]
+        df = pd.DataFrame(keypoints, columns=[self.KEYPOINT_NAME_FIELD, self.PARENT_NAME_FIELD])
+        super().__init__(df)
