@@ -54,24 +54,28 @@ class FramesSelectionController(ControllerNavigator):
             self.video_capture.release()
 
     def save_frames(self, frames_selection_manager: FramesSelectionManager, directory_path):
-        if self.video_capture is None: return
-        tmp_pos = int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))-1
-        dt_str = datetime.strftime(datetime.now(), "%d.%m.%Y_%H.%M.%S")
-        file_name = "frame_{}.jpg"
-        dir_name = f"Frames of {self.video_file_name} {dt_str}"
-        directory_path = os.path.join(directory_path, dir_name)
-        os.makedirs(directory_path, exist_ok=True)
-        
-        for frame_i in frames_selection_manager.selected_frames:
-            self.video_capture.set(cv.CAP_PROP_POS_FRAMES, frame_i)
-            ret, frm = self.video_capture.read()
-            if ret:
-                frm_name = file_name.format(frame_i)
-                full_path = os.path.join(directory_path, frm_name)
-                is_success, im_buf_arr = cv.imencode(".jpg", frm)
-                if is_success:
-                    im_buf_arr.tofile(full_path)
-            else:
-                messagebox.showwarning("Невозможно прочитать кадр", 
-                                       f"Кадр {frame_i} не может быть прочтён.")
-        self.video_capture.set(cv.CAP_PROP_POS_FRAMES, tmp_pos)
+        if self.video_capture is None: return False
+        try:
+            tmp_pos = int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))-1
+            dt_str = datetime.strftime(datetime.now(), "%d.%m.%Y_%H.%M.%S")
+            file_name = "frame_{}.jpg"
+            dir_name = f"Frames of {self.video_file_name} {dt_str}"
+            directory_path = os.path.join(directory_path, dir_name)
+            os.makedirs(directory_path, exist_ok=True)
+            
+            for frame_i in frames_selection_manager.selected_frames:
+                self.video_capture.set(cv.CAP_PROP_POS_FRAMES, frame_i)
+                ret, frm = self.video_capture.read()
+                if ret:
+                    frm_name = file_name.format(frame_i)
+                    full_path = os.path.join(directory_path, frm_name)
+                    is_success, im_buf_arr = cv.imencode(".jpg", frm)
+                    if is_success:
+                        im_buf_arr.tofile(full_path)
+                else:
+                    messagebox.showwarning("Невозможно прочитать кадр", 
+                                        f"Кадр {frame_i} не может быть прочтён.")
+            self.video_capture.set(cv.CAP_PROP_POS_FRAMES, tmp_pos)
+        except Exception as e:
+            return False
+        return True

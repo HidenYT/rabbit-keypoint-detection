@@ -35,6 +35,8 @@ class FramesSelectionView(View["FramesSelectionController"],
 
     def setup_left_panel(self) -> tk.Frame:
         frm = tk.Frame(self)
+        lbl_info = tk.Label(frm, text="Выбранные кадры")
+        lbl_info.pack(fill='x')
         self.frm_selected_frames = SelectedFramesFrame(frm, self)
         self.frm_selected_frames.pack(fill='both', expand=True)
         btn_choose_video = ttk.Button(frm, text="Открыть видео", command=self.on_open_video)
@@ -67,8 +69,11 @@ class FramesSelectionView(View["FramesSelectionController"],
     def save_selected_frames(self):
         dir = filedialog.askdirectory().replace("/", os.sep)
         if dir:
-            self.controller.save_frames(self.frames_selection_manager, dir)
-            messagebox.showinfo("Сохранение", "Файлы были успешно сохранены.")
+            saved = self.controller.save_frames(self.frames_selection_manager, dir)
+            if saved:
+                messagebox.showinfo("Сохранение", "Файлы были успешно сохранены.")
+            else:
+                messagebox.showerror("Сохранение", "При сохранении произошла ошибка.")
 
     def on_selection_clear(self):
         self.frm_selected_frames.remove_all_frames()
