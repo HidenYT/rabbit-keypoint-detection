@@ -17,15 +17,17 @@ class FramesSelectionManager:
         self.listener = frame_selection_listener
 
     def select(self, frame_idx: int):
-        self.selected_frames.add(frame_idx)
-        self.listener.on_selected(frame_idx)
+        if not self.selected(frame_idx):
+            self.selected_frames.add(frame_idx)
+            self.listener.on_selected(frame_idx)
     
     def selected(self, frame_idx: int) -> bool:
         return frame_idx in self.selected_frames
     
     def remove(self, frame_idx: int):
-        self.selected_frames.remove(frame_idx)
-        self.listener.on_removed(frame_idx)
+        if not self.selected(frame_idx):
+            self.selected_frames.remove(frame_idx)
+            self.listener.on_removed(frame_idx)
 
     def toggle(self, frame_idx: int):
         if self.selected(frame_idx):
