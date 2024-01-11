@@ -1,5 +1,3 @@
-from math import exp
-from tkinter import Menu
 from core.mvc.view import View
 import tkinter as tk
 from tkinter import ttk
@@ -7,7 +5,7 @@ from tkinter import filedialog
 from core.widgets.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
 from core.models.image import ImageFile
-from core.models.skeleton import DefaultSkeleton, Skeleton
+from core.models.skeleton import Skeleton
 from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft, webp_ft
 
 from typing import TYPE_CHECKING, Any, Callable, List
