@@ -70,8 +70,8 @@ class VideoFrame(tk.Frame):
             frm, 
             from_=0, 
             to=self.frames_n-1, 
-            value=0, 
-            command=self.on_slider_changed
+            value=0,
+            command=self.on_slider_move,
         )
         slider.bind("<ButtonRelease-1>", self.on_slider_changing_complete)
         slider.pack(fill='both', side='left', expand=True)
@@ -99,12 +99,8 @@ class VideoFrame(tk.Frame):
         self.btn_select.pack(side='left', fill='both', expand=True)
         return frm
     
-    def on_slider_changed(self, value: str):
-        '''Функция, срабатывающая при движении слайдера, то есть при каждом изменении кадра видер'''
-        frame_n = int(round(float(value)))
-        if self.frame_change_listener is not None:
-            self.frame_change_listener.on_video_frame_change(frame_n)
-            self.frame_n_label.config(text=str(frame_n))
+    def on_slider_move(self, value):
+        self.frame_n_label.config(text=str(int(round(self.slider.get()))))
 
     def on_slider_changing_complete(self, event):
         '''Функция, срабатывающая после того, как слайдер был отпущен, 
@@ -112,8 +108,6 @@ class VideoFrame(tk.Frame):
         frame_n = int(round(float(self.slider.get())))
         if self.frame_change_listener is not None and not self.playing:
             self.frame_change_listener.on_video_frame_change_complete(frame_n)
-            self.frame_n_label.config(text=str(frame_n))
-            self.update_select_button_bg()
         
     def play_video(self):
         '''Функция, начинающая проигрывать видео с текущего кадра.'''
@@ -124,13 +118,12 @@ class VideoFrame(tk.Frame):
         
         def play():
             if not self.playing: return
-            img = self.controller.get_next_video_frame()
-            if img is None: 
+            try:
+                self.update_frame()
+            except IndexError as e:
+                print(e)
                 self.pause_video()
                 return
-            self.canvas.set_image(img)
-            self.update_frame_n_info()
-            self.update_select_button_bg()
             self.master.after(delay, play)
         self.disable_control()
         self.playing = True
@@ -140,15 +133,6 @@ class VideoFrame(tk.Frame):
         '''Функция, ставящая воспроизведение видео на паузу.'''
         self.playing = False
         self.enable_control()
-
-    def update_frame_n_info(self):
-        '''Функция, обновляющая значения слайдера, текста, показывающего текущий кадр, в соответствии с текущим показываемым кадром.
-        
-        Также функция меняет фон кнопки для выбора кадра в соответствии с тем, выбран ли текущий кадр.'''
-        if self.controller.get_video_frame_n() is None: return
-        self.frame_n_label.config(text=str(self.controller.get_video_frame_n()-1))
-        self.slider.config(value=self.controller.get_video_frame_n()-1)
-        self.update_select_button_bg()
     
     def set_video_pos(self, pos: int):
         '''Устанавливает видео на определённый кадр №`pos`. Меняет информацию в `VideoCapture`, 
@@ -163,8 +147,9 @@ class VideoFrame(tk.Frame):
         
         Например, если текущий кадр равен 60, и `delta` равно -4, то текущий кадр видео
         станет 56.'''
-        pos = int(round(float(self.slider.get())))
-        self.set_video_pos(pos+delta)
+        frame_n = self.controller.get_showing_frame_n()
+        if frame_n is None: return
+        self.set_video_pos(frame_n+delta)
     
     def disable_control(self):
         '''Отключает кнопки для изменения кадра на 1, а также слайдер.'''
@@ -180,15 +165,10 @@ class VideoFrame(tk.Frame):
 
     def toggle_current_frame_selection(self):
         '''Инвертирует выбор текущего кадра. Если кадр не выбран, он добавляется в список выбранных кадров. Иначе удаляется оттуда.'''
-        frame_n = int(round(float(self.slider.get())))
+        frame_n = self.controller.get_showing_frame_n()
+        if frame_n is None: return
         self.frame_selection_manager.toggle(frame_n)
         self.update_select_button_bg()
-
-    def set_image(self, img: Image.Image):
-        '''Устанавливает изображение `Canvas`, а также меняет слайдер, текст и цвет кнопки
-        в соответствии с текущим кадром.'''
-        self.update_frame_n_info()
-        self.canvas.set_image(img)
 
     def update_select_button_bg(self):
         '''Обновляет фон кнопки выбора кадра'''
@@ -197,3 +177,12 @@ class VideoFrame(tk.Frame):
             self.btn_select.config(bg='green')
         else:
             self.btn_select.config(bg='red')
+        
+    def update_frame(self):
+        '''Обновляет текущий кадр, отображаемый № кадра, позицию слайдера и цвет кнопки выбора кадра.'''
+        if self.controller.get_showing_frame_n() is None: return
+        self.canvas.set_image(self.controller.get_current_frame())
+        frame_n = int(self.controller.get_showing_frame_n())
+        self.slider.config(value=frame_n)
+        self.frame_n_label.config(text=str(frame_n))
+        self.update_select_button_bg()

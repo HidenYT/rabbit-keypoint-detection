@@ -1,4 +1,5 @@
 import os
+from tkinter import messagebox
 from typing import TYPE_CHECKING
 import tkinter as tk
 from tkinter import ttk, filedialog
@@ -53,15 +54,9 @@ class FramesSelectionView(View["FramesSelectionController"],
         self.video_frame.set_frames_n(frames_n)
         self.on_video_frame_change_complete(0)
 
-    def on_video_frame_change(self, frame_n: int):
-        pass
-
     def on_video_frame_change_complete(self, frame_n: int):
-        img = self.controller.set_video_frame(frame_n)
-        if img is not None: self.video_frame.set_image(img)
-
-    def on_frame_selection_toggle(self, frame_idx: int):
-        pass
+        self.controller.set_video_frame(frame_n)
+        self.video_frame.update_frame()
 
     def on_selected(self, frame_idx: int):
         self.frm_selected_frames.select_frame(frame_idx)
@@ -73,6 +68,7 @@ class FramesSelectionView(View["FramesSelectionController"],
         dir = filedialog.askdirectory().replace("/", os.sep)
         if dir:
             self.controller.save_frames(self.frames_selection_manager, dir)
+            messagebox.showinfo("Сохранение", "Файлы были успешно сохранены.")
 
     def on_selection_clear(self):
         self.frm_selected_frames.remove_all_frames()

@@ -26,31 +26,27 @@ class FramesSelectionController(ControllerNavigator):
         self.video_capture = cv.VideoCapture(file_path)
         return int(self.video_capture.get(cv.CAP_PROP_FRAME_COUNT))
     
-    def set_video_frame(self, n: int) -> Image.Image | None:
+    def set_video_frame(self, n: int) -> None:
         if self.video_capture is None: return None
         self.video_capture.set(cv.CAP_PROP_POS_FRAMES, n)
+    
+    def get_current_frame(self) -> Image.Image | None:
+        if self.video_capture is None: return None
+        frame_n = self.get_showing_frame_n()
         ret, frm = self.video_capture.read()
         if not ret: 
-            raise IndexError(f"Frame #{n} can not be extracted from the video.")
+            raise IndexError(f"Frame #{frame_n+1} can not be extracted from the video.")
         img = cv.cvtColor(frm, cv.COLOR_BGR2RGB)
         return Image.fromarray(img)
-    
-    def get_next_video_frame(self) -> Image.Image | None:
-        if self.video_capture is None: return None
-        ret, frm = self.video_capture.read()
-        if ret: 
-            img = cv.cvtColor(frm, cv.COLOR_BGR2RGB)
-            return Image.fromarray(img)
-        return None 
 
     def get_video_fps(self) -> int | None:
         if self.video_capture is not None: 
             return int(self.video_capture.get(cv.CAP_PROP_FPS))
         return None
     
-    def get_video_frame_n(self) -> int | None:
+    def get_showing_frame_n(self) -> int | None:
         if self.video_capture is not None:
-            return int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))
+            return int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))-1
         return None
 
     def __del__(self):
