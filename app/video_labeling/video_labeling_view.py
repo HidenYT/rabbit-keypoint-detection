@@ -110,6 +110,7 @@ class LabelingView(View["LabelingController"]):
         btn_check_labels = ttk.Button(menu, text="Проверить разметку", command=self.check_labels)
         btn_add_image.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_choose_skeleton.pack(fill=tk.BOTH, side=tk.BOTTOM)
+        btn_save_all_dataset.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_save_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_check_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
         return menu
@@ -142,8 +143,14 @@ class LabelingView(View["LabelingController"]):
             self.controller.save_labels(self.canvases, file)
     
     def save_dataset(self):
-        pass
-
+        file = filedialog.asksaveasfilename(
+            defaultextension="", 
+            filetypes=[hd5_ft]
+        )
+        if not file: return
+        # Сохраняем отметки
+        with CanvasScaler(self.canvases):
+            self.controller.save_dataset(self.canvases, file)
     
     def check_labels(self):
         if self.canvas is None: return
