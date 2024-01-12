@@ -106,6 +106,7 @@ class LabelingView(View["LabelingController"]):
         btn_add_image = ttk.Button(menu, text="Добавить изображения", command=self.add_images)
         btn_choose_skeleton = ttk.Button(menu, text="Выбрать скелет", command=self.choose_skeleton)
         btn_save_labels = ttk.Button(menu, text="Сохранить разметку", command=self.save_labels)
+        btn_save_all_dataset = ttk.Button(menu, text="Сохранить датасет", command=self.save_dataset)
         btn_check_labels = ttk.Button(menu, text="Проверить разметку", command=self.check_labels)
         btn_add_image.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_choose_skeleton.pack(fill=tk.BOTH, side=tk.BOTTOM)
@@ -136,27 +137,19 @@ class LabelingView(View["LabelingController"]):
             filetypes=[csv_ft, json_ft, hd5_ft]
         )
         if not file: return
-        # Запоминаем текущий масштаб на каждом канвасе в список scales
-        # и меняем масштаб на исходный, чтобы изображение было в исходную величину 
-        scales = []
-        for canvas in self.canvases:
-            s = canvas.imscale
-            scales.append(canvas.imscale)
-            canvas.scale(tk.ALL, *canvas.get_containter_top_left(), 1/s, 1/s)
-            canvas.imscale = 1
-            canvas.update_image()
         # Сохраняем отметки
-        self.controller.save_labels(self.canvases, file)
-        # Возвращаем масштаб на каждом холсте, как было
-        for i, canvas in enumerate(self.canvases):
-            canvas.scale(tk.ALL, *canvas.get_containter_top_left(), scales[i], scales[i])
-            canvas.imscale = scales[i]
-            canvas.update_image()
+        with CanvasScaler(self.canvases):
+            self.controller.save_labels(self.canvases, file)
+    
+    def save_dataset(self):
+        pass
+
     
     def check_labels(self):
         if self.canvas is None: return
         import matplotlib.pyplot as plt
-        kps = self.canvas.keypoint_manager.get_keypoints_coordinates()
+        with CanvasScaler(self.canvas):
+            kps = self.canvas.keypoint_manager.get_keypoints_coordinates()
         x, y = [], []
         for f, s in kps.values():
             x.append(f)
@@ -185,3 +178,39 @@ class ImageButtonFrame(tk.Frame):
         )
         btn_del.pack(fill=tk.BOTH, side=tk.RIGHT)
         btn_image.pack(fill=tk.BOTH, side=tk.RIGHT,  expand=True)
+    
+class CanvasScaler:
+    '''Менеджер контекста для изменения масштаба изображений при получении координат ключевых точек (при сохранении или проверке разметки).
+    
+    При сохранении разметки координаты точек сильно зависят от масштаба. Например, 
+    если расставить точки и сильно отдалить изображение, то при сохранении все 
+    точки будут иметь почти одинаковые координаты (так как при отдалении на самом
+    деле меняется масштаб, а стало быть координаты становятся ближе друг к другу).
+    
+    Чтобы этого не происходило, перед сохранением масштаб изображения на Canvas
+    делается таким, каким он был изначально. При этом после сохранения масштаб
+    необходимо восстановить. 
+    
+    В начале менеджер контекста переводит изображения на всех Canvas-ах в исходный
+    масштаб. По окончании возвращает масштаб таким, каким он был.'''
+    def __init__(self, canvases: List[LabelingCanvas] | LabelingCanvas) -> None:
+        if isinstance(canvases, LabelingCanvas): canvases = [canvases]
+        self.__canvases = canvases 
+
+    def __enter__(self):
+        # Запоминаем текущий масштаб на каждом канвасе в список scales
+        # и меняем масштаб на исходный, чтобы изображение было в исходную величину 
+        self.__scales = scales = []
+        for canvas in self.__canvases:
+            s = canvas.imscale
+            scales.append(canvas.imscale)
+            canvas.scale(tk.ALL, 0, 0, 1/s, 1/s)
+            canvas.imscale = 1
+            canvas.update_image()
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        # Возвращаем масштаб на каждом холсте, как было
+        for i, canvas in enumerate(self.__canvases):
+            canvas.scale(tk.ALL, 0, 0, self.__scales[i], self.__scales[i])
+            canvas.imscale = self.__scales[i]
+            canvas.update_image()
