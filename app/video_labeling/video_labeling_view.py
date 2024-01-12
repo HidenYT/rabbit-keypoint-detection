@@ -6,7 +6,7 @@ from core.widgets.scrollable_frame import VerticalScrolledFrame
 from .labeling_canvas import LabelingCanvas
 from core.models.image import ImageFile
 from core.models.skeleton import Skeleton
-from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft, webp_ft
+from core.filetypes import csv_ft, png_ft, jpg_ft, images_ft, json_ft, hd5_ft, webp_ft, seven_z_ft
 
 from typing import TYPE_CHECKING, Any, Callable, List
 if TYPE_CHECKING:
@@ -145,7 +145,7 @@ class LabelingView(View["LabelingController"]):
     def save_dataset(self):
         file = filedialog.asksaveasfilename(
             defaultextension="", 
-            filetypes=[hd5_ft]
+            filetypes=[seven_z_ft]
         )
         if not file: return
         # Сохраняем отметки

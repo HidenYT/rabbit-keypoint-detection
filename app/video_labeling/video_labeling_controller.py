@@ -7,16 +7,21 @@ from .video_labeling_view import LabelingView
 import pandas as pd
 from core.models.skeleton import DefaultSkeleton, Skeleton
 from tkinter.messagebox import showwarning
-from typing import Iterable, List, TYPE_CHECKING, Sequence
+from typing import List, TYPE_CHECKING
 from .labeling_canvas import LabelingCanvas
 import os
 from core.filetypes import csv_ft, json_ft, hd5_ft
 import h5py
+import py7zr
+from io import BytesIO
 if TYPE_CHECKING:
     from main_app import MainApp
 
 
 class LabelingController(ControllerNavigator):
+    # TODO для сохранений надо сделать отдельные классы, которые будут этим заниматься
+    # Здесь слишком много кода для сохранений
+
     def __init__(self, root: "MainApp") -> None:
         super().__init__(root)
         self.skeleton: Skeleton | None = DefaultSkeleton()
@@ -86,13 +91,10 @@ class LabelingController(ControllerNavigator):
     def save_labels_to_h5(self, file_path: str, label_names: List[str], paths_and_labels: List[List[int]], paths: List[str]):
         # Пути к файлам
         image_paths = np.array(paths, dtype=np.unicode_)
-
         # Названия точек
         label_names_data = np.array(label_names)
-        
         # Составляем матрицу данных
         labels_data = np.array(paths_and_labels, dtype=np.int32)
-
         with h5py.File(file_path, 'w') as f:
             skeleton_dset = f.create_dataset("skeleton", label_names_data.shape, dtype=h5py.string_dtype())
             skeleton_dset[:] = label_names_data
@@ -108,38 +110,44 @@ class LabelingController(ControllerNavigator):
             showwarning("Скелет не был выбран", "Невозможно сохранить разметку, так как скелет не был выбран.")
             return
         # Названия точек
-        label_names_data = np.array(list(self.skeleton.nodes), dtype=np.unicode_)
+        label_names = list(self.skeleton.nodes)
+        # Названия столбцов в итоговом файле
+        result_label_names = ["Image path"]
+        for name in label_names:
+            result_label_names.append(f"{name}_x")
+            result_label_names.append(f"{name}_y")
         
-        # Составляем матрицу данных
-        labels_data = []
+        # Составляем таблицу данных
+        data: List[List[int | str]] = []
         for canvas in canvases:
             row = []
             # Получаем координаты всех точек канваса
             coords = canvas.keypoint_manager.get_keypoints_coordinates()
             # Для каждой точки добавляем x и y
-            for name in self.skeleton.nodes:
+            for name in label_names:
                 row.append(int(round(coords[name][0])))
                 row.append(int(round(coords[name][1])))
-            labels_data.append(row)
-        
-        labels_data = np.array(labels_data, dtype=np.int32)
+            data.append(row)
 
-        # Составляем матрицу изображений
-        images_data: np.ndarray = np.array([
-            np.asarray(canvas.image.pil_image) for canvas in canvases
-        ], dtype=np.int32)
-        
+        # Добавляем во все строки в первый столбец путь к изображению
+        image_name_template = "img{}.jpg"
+        for i, row in enumerate(data):
+            row.insert(0, image_name_template.format(i))
+
+        labels_csv = BytesIO()
+        df = pd.DataFrame(data=data, columns=result_label_names)
+        df.to_csv(labels_csv, index=False, encoding="utf-16")
         try:
-            with h5py.File(file_path, 'w') as f:
-                skeleton_dset = f.create_dataset("skeleton", label_names_data.shape, dtype=h5py.string_dtype())
-                skeleton_dset[:] = label_names_data
-
-                images_dset = f.create_dataset("images", images_data.shape, dtype=np.int8)
-                images_dset[:] = images_data
-                
-                labels_dset = f.create_dataset("labels", labels_data.shape)
-                labels_dset[:] = labels_data
+            with py7zr.SevenZipFile(file_path, "w") as f:
+                labels_csv.seek(0)
+                f.writef(labels_csv, "labels.csv")
+                for i, canvas in enumerate(canvases):
+                    img = canvas.image.pil_image
+                    img_bytes = BytesIO()
+                    img.save(img_bytes, format="JPEG")
+                    img_bytes.seek(0)
+                    f.writef(img_bytes, image_name_template.format(i))
         except Exception as e:
-            messagebox.showerror("Сохранение датасета", f"При сохранении датасета произошла ошибка: {e}.")
+            messagebox.showerror("Сохранение разметки", f"При сохранении разметки произошла ошибка: {e}.")
         else:
             messagebox.showinfo("Сохранение разметки", "Сохранение успешно завершено.")
