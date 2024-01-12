@@ -25,7 +25,7 @@ class FramesSelectionManager:
         return frame_idx in self.selected_frames
     
     def remove(self, frame_idx: int):
-        if not self.selected(frame_idx):
+        if self.selected(frame_idx):
             self.selected_frames.remove(frame_idx)
             self.listener.on_removed(frame_idx)
 
