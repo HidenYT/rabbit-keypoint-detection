@@ -3,7 +3,7 @@ import pandas as pd
 
 from core.models.skeleton import Skeleton
 from video_labeling.labeling_canvas import LabelingCanvas
-from .label_saver import ImagePathSaverMixin
+from ..label_saver import ImagePathSaverMixin
 
 
 class CSVLabelSaver(ImagePathSaverMixin):

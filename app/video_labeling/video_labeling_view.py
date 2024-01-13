@@ -145,7 +145,7 @@ class LabelingView(View["LabelingController"]):
     def save_dataset(self):
         file = filedialog.asksaveasfilename(
             defaultextension="", 
-            filetypes=[seven_z_ft]
+            filetypes=[seven_z_ft, hd5_ft]
         )
         if not file: return
         # Сохраняем отметки

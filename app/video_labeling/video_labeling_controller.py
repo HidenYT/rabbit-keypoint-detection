@@ -1,6 +1,8 @@
 from tkinter import messagebox
-from .data_saving.seven_zip_dataset_saver import SevenZipDSSaver
-from .data_saving.label_saver_selector import LabelSaverSelector
+
+from .data_saving.datasets.dataset_saver_selector import DatasetSaverSelector
+from .data_saving.datasets.seven_zip_dataset_saver import SevenZipDSSaver
+from .data_saving.labels.label_saver_selector import LabelSaverSelector
 from core.mvc.view import View
 from core.mvc.controller import ControllerNavigator
 from .video_labeling_view import LabelingView
@@ -15,7 +17,7 @@ class LabelingController(ControllerNavigator):
 
     def __init__(self, root: "MainApp") -> None:
         super().__init__(root)
-        self.skeleton: Skeleton | None = None
+        self.skeleton: Skeleton | None = DefaultSkeleton()
 
     def create_view(self) -> View:
         view = LabelingView(self)
@@ -43,7 +45,8 @@ class LabelingController(ControllerNavigator):
         if self.skeleton is None: 
             show_no_skeleton_warning()
             return
-        saver = SevenZipDSSaver(canvases, self.skeleton, file_path)
+        saver_selector = DatasetSaverSelector(file_path)
+        saver = saver_selector.select_saver(canvases, self.skeleton)
         try:
             saver.save()
         except Exception as e:

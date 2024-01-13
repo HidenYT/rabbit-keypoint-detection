@@ -1,5 +1,5 @@
 import pandas as pd
-from .label_saver import ImagePathSaverMixin
+from ..label_saver import ImagePathSaverMixin
 
 
 class JSONLabelSaver(ImagePathSaverMixin):

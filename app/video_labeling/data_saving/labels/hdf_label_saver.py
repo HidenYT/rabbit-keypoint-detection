@@ -1,6 +1,6 @@
 import h5py
 import numpy as np
-from .label_saver import LabelSaver
+from ..label_saver import LabelSaver
 
 
 class HDFLabelSaver(LabelSaver):

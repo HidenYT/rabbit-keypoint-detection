@@ -4,15 +4,13 @@ from core.filetypes import csv_ft, json_ft, hd5_ft
 from .csv_label_saver import CSVLabelSaver
 from .hdf_label_saver import HDFLabelSaver
 from .json_label_saver import JSONLabelSaver
-from .label_saver import LabelSaver
+from ..label_saver import LabelSaver
+from ..saver_selector import SaverSelector
 from core.models.skeleton import Skeleton
 from video_labeling.labeling_canvas import LabelingCanvas
 
 
-class LabelSaverSelector:
-    def __init__(self, file_path: str) -> None:
-        _, self.ext = os.path.splitext(file_path)
-        self._file_path = file_path
+class LabelSaverSelector(SaverSelector):
     
     def select_saver(self, canvases: List[LabelingCanvas], skeleton: Skeleton) -> LabelSaver:
         if self.ext in csv_ft[1]:
