@@ -115,6 +115,7 @@ class AutoFrameSelectionWindow(tk.Toplevel):
 
     
     def setup_selected_frames(self, selected_frames: List[int] = []):
+        # TODO Сделать ограничение длины строки выбранных кадров, иначе может получиться очень длинное окно
         self.frm_selected_frames = frm = ttk.Frame(self)
         selected_frames_str = ""
         for i in range(len(selected_frames)):
