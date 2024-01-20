@@ -1,2 +1,6 @@
 .ipynb_checkpoints/
-videos/
+__pycache__/
+venv/
+.env
+.vscode/
+.idea/
