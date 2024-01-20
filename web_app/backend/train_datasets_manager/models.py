@@ -1,13 +1,17 @@
 from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
+from utils.file_uploads import default_upload_path
+from django.conf import settings
 
+def train_dataset_upload_path(instance: "TrainDataset", filename: str) -> str:
+    return default_upload_path(settings.TRAIN_DATASET_UPLOAD_DIR, instance.user, filename)
 
 class TrainDataset(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
 
-    file_path = models.CharField(max_length=500)
+    file = models.FileField(upload_to=train_dataset_upload_path)
 
     created_at = models.DateTimeField(default=datetime.now)
     updated_at = models.DateTimeField(default=datetime.now)
