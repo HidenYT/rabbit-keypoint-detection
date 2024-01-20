@@ -16,17 +16,22 @@
 
 ## Архитектура проекта
 <p align="center">
-    <img src="images/architecture%20-%20data%20preparation.png" alt="drawing"/>
+    <img src="images/architecture%20-%20data%20preparation.png" alt="Flow diagram of the data preparation for model learning"/>
 </p>
 
 ---
 
 <p align="center">
-<img src="images/architecture%20-%20NN%20training.png" alt="drawing"/>
+<img src="images/architecture%20-%20NN%20training.png" alt="Flow diagram of the model learning"/>
 </p>
 
 ---
 
 <p align="center">
-<img src="images/architecture - inference.png" alt="drawing"/>
+<img src="images/architecture - inference.png" alt="Flow diagram of the model inference"/>
+</p>
+
+## Схема базы данных веб-приложения
+<p align="center">
+<img src="images/db_schema.png" alt="Image for database schema"/>
 </p>
