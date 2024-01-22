@@ -1,0 +1,13 @@
+{% extends "base/base.html" %}
+
+{% block title %} Набор данных для обучения "{{dataset.name}}" {%endblock%}
+
+{% block content %}
+<div>
+    <h2>{{dataset.name}}</h2>
+    <p>
+        {{dataset.description}}
+    </p>
+    <a href="{{ url('train_datasets:edit_train_dataset', kwargs={'id': dataset.pk}) }}"></a>
+</div>
+{% endblock %}

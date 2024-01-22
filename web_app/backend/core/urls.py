@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
     path('auth/', include('authentication.urls')),
+    path('train-datasets/', include('train_datasets_manager.urls')),
 ]

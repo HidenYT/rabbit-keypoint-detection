@@ -1,0 +1,13 @@
+{% extends "base/base.html" %}
+
+{% block title %} Наборы данных для обучения {%endblock%}
+
+{% block content %}
+<ul>
+    {% for dataset in datasets %}
+    <li>
+        <a href="{{dataset.get_absolute_url()}}">{{dataset.name}}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

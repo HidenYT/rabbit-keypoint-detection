@@ -1,4 +1,5 @@
 from django.contrib import admin
+from train_datasets_manager.forms import DatasetUploadForm
 from .models import TrainDataset, Skeleon, SkeletonKeypoint
 
 
