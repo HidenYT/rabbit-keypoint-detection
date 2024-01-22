@@ -3,6 +3,7 @@
 {% block title %} Наборы данных для обучения {%endblock%}
 
 {% block content %}
+<a href="{{ url('train_datasets:upload_train_dataset') }}">Загрузить</a>
 <ul>
     {% for dataset in datasets %}
     <li>

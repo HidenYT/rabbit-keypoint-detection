@@ -8,6 +8,7 @@
     <p>
         {{dataset.description}}
     </p>
-    <a href="{{ url('train_datasets:edit_train_dataset', kwargs={'id': dataset.pk}) }}"></a>
+    <a href="{{ url('train_datasets:edit_train_dataset', kwargs={'id': dataset.id}) }}">Изменить</a>
+    <a href="{{ url('train_datasets:delete_train_dataset', kwargs={'id': dataset.id}) }}">Удалить</a>
 </div>
 {% endblock %}

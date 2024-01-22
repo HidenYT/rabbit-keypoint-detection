@@ -6,3 +6,5 @@ class DatasetUploadForm(forms.ModelForm):
         model = TrainDataset
         exclude = ['created_at', 'updated_at', 'user']
     
+class DatasetDeleteForm(forms.Form):
+    pass

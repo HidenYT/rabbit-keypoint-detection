@@ -14,6 +14,9 @@
         </li>
         {% else %}
         <li class="nav-button">
+            <a href="{{ url('train_datasets:train_datasets_list') }}">Наборы данных для обучения</a>
+        </li>
+        <li class="nav-button">
             <a href="{{ url('auth:logout') }}">Выйти</a>
         </li>
         {% endif %}
