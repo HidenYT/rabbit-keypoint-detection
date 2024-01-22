@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from turtle import back
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -159,3 +160,10 @@ MEDIA_ROOT = BASE_DIR / "uploads"
 TRAIN_DATASET_UPLOAD_DIR = "train_datasets"
 
 INFERENCE_VIDEO_UPLOAD_DIR = "inference_videos"
+
+
+# SENDFILE
+
+SENDFILE_BACKEND = "django_sendfile.backends.development"
+
+SENDFILE_ROOT = MEDIA_ROOT

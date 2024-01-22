@@ -5,6 +5,7 @@ from .views import (
     upload_train_dataset_view,
     edit_train_dataset_view,
     delete_train_dataset_view,
+    train_dataset_data_view,
 )
 
 app_name = 'train_datasets'
@@ -15,5 +16,6 @@ urlpatterns = [
     path('edit/<int:id>', edit_train_dataset_view, name='edit_train_dataset'),
     path('delete/<int:id>', delete_train_dataset_view, name='delete_train_dataset'),
     path('<int:id>', detail_train_dataset_view, name='view_train_dataset'),
+    path('<int:id>/file', train_dataset_data_view, name='train_dataset_data'),
 
 ]
