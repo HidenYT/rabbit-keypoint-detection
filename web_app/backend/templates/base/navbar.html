@@ -1,0 +1,21 @@
+
+
+<nav>
+    <ul class="nav-ul">
+        <li class="nav-button">
+            <a href="{{ url('index') }}">Главная</a>
+        </li>
+        {% if not request.user.is_authenticated %}
+        <li class="nav-button">
+            <a href="{{ url('auth:login') }}">Войти</a>
+        </li>
+        <li class="nav-button">
+            <a href="{{ url('auth:register') }}">Зарегистрироваться</a>
+        </li>
+        {% else %}
+        <li class="nav-button">
+            <a href="{{ url('auth:logout') }}">Выйти</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>

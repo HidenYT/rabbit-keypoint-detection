@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'train_datasets_manager',
     'model_inference',
     'model_training',
+    'authentication',
+    'index',
     
 ]
 
@@ -61,6 +63,14 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
+        {
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        'DIRS': ['templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'environment': 'core.jinja2.environment',
+        },
+    },
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
@@ -74,6 +84,7 @@ TEMPLATES = [
             ],
         },
     },
+
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
@@ -129,6 +140,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
