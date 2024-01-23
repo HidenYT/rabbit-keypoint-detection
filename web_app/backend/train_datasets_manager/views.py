@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django_sendfile import sendfile
 from django.urls import reverse
-from functools import wraps
 
 from train_datasets_manager.forms import DatasetDeleteForm, DatasetEditForm, DatasetUploadForm
 from .models import TrainDataset
@@ -34,6 +33,7 @@ def upload_train_dataset_view(request):
             dataset.name = form.cleaned_data['name']
             dataset.description = form.cleaned_data['description']
             dataset.user = request.user
+            dataset.file = request.FILES['file']
             dataset.save()
             return redirect(reverse('train_datasets:view_train_dataset', kwargs={"id":dataset.pk}))
     return render(request, 'train_datasets_manager/upload.html', {"form": form})

@@ -1,0 +1,27 @@
+version: "3"
+services:
+  backend:
+    build: .
+    image: animal_keypoint_detection_backend
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+      - backend_migration
+    volumes:
+      - .:/animal_keypoint_detection_backend_files
+  backend_migration:
+    image: animal_keypoint_detection_backend
+    command: poetry run python manage.py migrate
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:16.1
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    ports:
+      - 5432:5432
+    volumes:
+      - .:/docker-entrypoint-initdb.d
