@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django_sendfile import sendfile
 from django.urls import reverse
 
-from train_datasets_manager.forms import DatasetDeleteForm, DatasetEditForm, DatasetUploadForm
+from .forms import DatasetEditForm, DatasetUploadForm
 from .models import TrainDataset
 
 def get_dataset(request: HttpRequest, id: int) -> TrainDataset:
@@ -56,8 +56,7 @@ def edit_train_dataset_view(request: HttpRequest, id: int):
 @login_required
 def delete_train_dataset_view(request: HttpRequest, id: int):
     dataset = get_dataset(request, id)
-    form = DatasetDeleteForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
+    if request.method == 'POST':
         dataset.delete()
         return redirect(reverse("train_datasets:train_datasets_list"))
     return render(request, "train_datasets_manager/delete.html", {"dataset": dataset})

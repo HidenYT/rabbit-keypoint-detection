@@ -11,6 +11,3 @@ class DatasetEditForm(forms.ModelForm):
         model = TrainDataset
         exclude = ['created_at', 'updated_at', 'user', 'file']
     file = forms.FileField(required=False)
-    
-class DatasetDeleteForm(forms.Form):
-    pass
