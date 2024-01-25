@@ -51,6 +51,7 @@ def edit_train_dataset_view(request: HttpRequest, id: int):
                 dataset.file = request.FILES['file']
             dataset.updated_at = datetime.now()
             dataset.save()
+            return redirect(reverse('train_datasets_manager:detail_train_dataset', kwargs={"id":dataset.pk}))
     return render(request, 'train_datasets_manager/edit.html', {"form": form, "dataset": dataset})
 
 @login_required

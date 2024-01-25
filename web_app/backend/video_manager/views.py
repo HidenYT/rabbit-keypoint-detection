@@ -52,6 +52,7 @@ def edit_inference_video_view(request: HttpRequest, id: int):
                 video.file = request.FILES['file']
             video.updated_at = datetime.now()
             video.save()
+            return redirect(reverse('video_manager:detail_inference_video', kwargs={"id":video.pk}))
     return render(request, 'video_manager/edit.html', {"form": form, "video": video})
 
 @login_required
