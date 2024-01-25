@@ -2,6 +2,7 @@ from datetime import datetime
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 from utils.file_uploads import default_upload_path
 
 def inference_video_upload_path(instance: "InferenceVideo", filename: str) -> str:
@@ -17,3 +18,6 @@ class InferenceVideo(models.Model):
     updated_at = models.DateTimeField(default=datetime.now)
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
+        return reverse("video_manager:detail_inference_video", args=[self.pk])

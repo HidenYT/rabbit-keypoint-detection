@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+
+{% block title %} Видео "{{video.name}}" {%endblock%}
+
+{% block content %}
+<div>
+    <h2>{{video.name}}</h2>
+    <p>
+        {{video.description}}
+    </p>
+    <a href="{{ url('video_manager:edit_inference_video', kwargs={'id': video.id}) }}">Изменить</a>
+    <a href="{{ url('video_manager:inference_video_data', kwargs={'id': video.id}) }}">Скачать</a>
+    <a href="{{ url('video_manager:delete_inference_video', kwargs={'id': video.id}) }}">Удалить</a>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+
+{% block title %} Видео {%endblock%}
+
+{% block content %}
+<a href="{{ url('video_manager:upload_inference_video') }}">Загрузить</a>
+<ul>
+    {% for video in videos %}
+    <li>
+        <a href="{{video.get_absolute_url()}}">{{video.name}}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -25,7 +25,7 @@ class TrainDataset(models.Model):
 
 
     def get_absolute_url(self):
-        return reverse('train_datasets:view_train_dataset', kwargs={"id": self.pk})
+        return reverse('train_datasets_manager:detail_train_dataset', kwargs={"id": self.pk})
 
 
 class Skeleon(models.Model):

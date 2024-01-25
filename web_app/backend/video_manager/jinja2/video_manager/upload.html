@@ -1,0 +1,18 @@
+{% extends "base/base.html" %}
+
+{% block title %} Загрузить видео {%endblock%}
+
+{% block content %}
+<div>
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {% for field in form %}
+            {{field.errors}}
+            {{field.label_tag()}}
+            {{field}}
+            <br>
+        {% endfor %}
+        <button type="submit">Загрузить</button>
+    </form>
+</div>
+{% endblock %}

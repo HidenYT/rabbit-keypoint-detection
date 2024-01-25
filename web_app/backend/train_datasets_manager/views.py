@@ -14,7 +14,7 @@ def get_dataset(request: HttpRequest, id: int) -> TrainDataset:
 
 @login_required
 def list_train_datasets_view(request: HttpRequest):
-    datasets = TrainDataset.objects.filter(user_id=request.user.id)
+    datasets = TrainDataset.objects.filter(user=request.user)
     ctx = {
         "datasets": datasets,
     }
@@ -36,7 +36,7 @@ def upload_train_dataset_view(request: HttpRequest):
             dataset.user = request.user
             dataset.file = request.FILES['file']
             dataset.save()
-            return redirect(reverse('train_datasets:view_train_dataset', kwargs={"id":dataset.pk}))
+            return redirect(reverse('train_datasets_manager:detail_train_dataset', kwargs={"id":dataset.pk}))
     return render(request, 'train_datasets_manager/upload.html', {"form": form})
 
 @login_required
@@ -58,7 +58,7 @@ def delete_train_dataset_view(request: HttpRequest, id: int):
     dataset = get_dataset(request, id)
     if request.method == 'POST':
         dataset.delete()
-        return redirect(reverse("train_datasets:train_datasets_list"))
+        return redirect(reverse("train_datasets_manager:list_train_datasets"))
     return render(request, "train_datasets_manager/delete.html", {"dataset": dataset})
 
 @login_required
