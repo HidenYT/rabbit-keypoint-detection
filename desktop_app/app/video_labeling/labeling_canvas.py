@@ -196,7 +196,6 @@ class LabelingCanvas(tk.Canvas):
         pos_x = randint(cont_x1+r, cont_x2-r)
         pos_y = randint(cont_y1+r, cont_y2-r)
         kp_id = self.create_text(pos_x, pos_y, text="", tags=self.KP_TAG)
-        self.create_text(pos_x-r, pos_y-r-10, text=key, font=("Helvetica", 10), tags=self.KP_TEXT_TAG)
         return kp_id
     
     def toggle_kp_visibility(self, event):
