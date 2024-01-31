@@ -8,7 +8,7 @@ from ..label_saver import ImagePathSaverMixin
 
 class CSVLabelSaver(ImagePathSaverMixin):
     def save(self):
-        df = pd.DataFrame(self.labels_data, columns=self.csv_column_names)
+        df = pd.DataFrame(self.labels_data, columns=self.label_names_multiindex_with_img_path)
         df.to_csv(self._file, index=False, encoding="utf-16")
 
 class CustomImagePathCSVLabelSaver(CSVLabelSaver):

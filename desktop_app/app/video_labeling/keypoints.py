@@ -119,6 +119,7 @@ class Keypoint:
         self.canvas = canvas
         self.id = id
         self.skeleton_node = skeleton_node
+        self.visible = True
 
     @property
     def coordinates(self):
@@ -131,3 +132,6 @@ class Keypoint:
     @property
     def y(self):
         return self.coordinates[1]
+    
+    def toggle_visibility(self):
+        self.visible = not self.visible

@@ -23,8 +23,11 @@ class LabelingCanvas(tk.Canvas):
 
         # Перемещение точек
         self.bind('<ButtonPress-1>', self.on_press_to_move)
-        self.bind("<B1-Motion>", self.on_mous_lb_move)
+        self.bind("<B1-Motion>", self.on_mouse_lb_move)
         self.bind("<ButtonRelease-1>", self.on_mouse_lb_release)
+
+        # Изменение видимости точки
+        self.bind("<ButtonPress-2>", self.toggle_kp_visibility)
 
         # Изображение Canvas-а
         self.image: ImageFile = image
@@ -143,7 +146,8 @@ class LabelingCanvas(tk.Canvas):
         for kpid in self.keypoint_manager.get_kp_ids():
             kp = self.keypoint_manager.get_kp_by_id(kpid)
             x1, y1 = self.coords(kpid)
-            self.create_oval(x1-self.KP_RADIUS, y1-self.KP_RADIUS, x1+self.KP_RADIUS, y1+self.KP_RADIUS, fill="#ffffff", tags=self.KP_CIRCLE_TAG)
+            color = "#00ff00" if kp.visible else "#ff0000"
+            self.create_oval(x1-self.KP_RADIUS, y1-self.KP_RADIUS, x1+self.KP_RADIUS, y1+self.KP_RADIUS, fill=color, tags=self.KP_CIRCLE_TAG)
 
             parent_node = kp.skeleton_node.parent
             if parent_node is None: continue
@@ -153,7 +157,7 @@ class LabelingCanvas(tk.Canvas):
             self.create_line(x1, y1, x2, y2, tags=self.SKELETON_LINE_TAG)
 
     def on_press_to_move(self, event):
-        id = self.find_closest_kp(event.x, event.y, halo = 10)
+        id = self.find_closest_kp(event.x, event.y, halo=LabelingCanvas.KP_RADIUS)
         if not id: return
         id = id[0]
         # Сохраняем движимую точку и 
@@ -166,7 +170,7 @@ class LabelingCanvas(tk.Canvas):
         self.drag_x = 0
         self.drag_y = 0
 
-    def on_mous_lb_move(self, event):
+    def on_mouse_lb_move(self, event):
         if self.drag_widget is None: return
         if self.drag_widget not in self.keypoint_manager.get_kp_ids(): return
 
@@ -196,3 +200,9 @@ class LabelingCanvas(tk.Canvas):
         text_id = self.create_text(pos_x-r, pos_y-r, text=key)
 
         return kp_id, text_id
+    
+    def toggle_kp_visibility(self, event):
+        id = self.find_closest_kp(event.x, event.y, halo=LabelingCanvas.KP_RADIUS)
+        if not id: return
+        self.keypoint_manager.get_kp_by_id(id[0]).toggle_visibility()
+        self.draw_skeleton_lines()

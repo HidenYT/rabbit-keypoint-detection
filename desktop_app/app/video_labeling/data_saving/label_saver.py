@@ -2,6 +2,7 @@ from typing import IO, List
 from .base_saver import BaseLabelDataSaver
 from core.models.skeleton import Skeleton
 from video_labeling.labeling_canvas import LabelingCanvas
+import pandas as pd
 
 
 class LabelSaver(BaseLabelDataSaver):
@@ -14,6 +15,15 @@ class LabelSaver(BaseLabelDataSaver):
         super().__init__(canvases, skeleton, file)
         # Названия меток
         self.label_names = list(skeleton.nodes)
+        # Названия столбцов с multiindex
+        self.label_names_multiindex = pd.MultiIndex.from_product(
+            [self.label_names, ["X", "Y"]], 
+            names=["Keypoint", "Axis"]
+        )
+        # Названия столбцов с multiindex со столбцов пути файла
+        self.label_names_multiindex_with_img_path = pd.MultiIndex.from_product(
+            [[self.IMAGE_PATH_COL], [""]]
+        ).append(self.label_names_multiindex)
         # Названия столбцов
         self.column_names: List[str] = []
         for name in self.label_names:
@@ -27,8 +37,12 @@ class LabelSaver(BaseLabelDataSaver):
             row: List[str] = []
             coords = canvas.keypoint_manager.get_keypoints_coordinates()
             for name in self.label_names:
-                row.append(str(int(round(coords[name][0]))))
-                row.append(str(int(round(coords[name][1]))))
+                if canvas.keypoint_manager.get_kp_by_name(name).visible:
+                    row.append(str(coords[name][0]))
+                    row.append(str(coords[name][1]))
+                else:
+                    row.append('')
+                    row.append('')
             self.labels_data.append(row)
 
 class ImagePathSaverMixin(LabelSaver):
