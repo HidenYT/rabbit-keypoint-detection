@@ -126,7 +126,6 @@ class LabelingCanvas(tk.Canvas):
     def set_skeleton(self, skeleton: Skeleton):
         # Удаляем старые keypoint-ы
         for id in self.keypoint_manager.get_kp_ids(): self.delete(id)
-        for id in self.keypoint_manager.get_text_ids(): self.delete(id)
         # Устанавливаем новый скелет, меняем его в менеджере точек
         self.skeleton = skeleton
         self.keypoint_manager.set_skeleton(skeleton)
@@ -134,9 +133,8 @@ class LabelingCanvas(tk.Canvas):
         
         # Генерируем создаём новые точки согласно скелету
         for key in skeleton.nodes:
-            kpid, text_id = self.create_kp_on_random_position(key)
+            kpid = self.create_kp_on_random_position(key)
             self.keypoint_manager.add_keypoint(kpid, key)
-            self.keypoint_manager.add_kp_text(kpid, text_id)
         # Отрисовка
         self.draw_skeleton_lines()
     
@@ -183,26 +181,23 @@ class LabelingCanvas(tk.Canvas):
         self.drag_x = event.x
         self.drag_y = event.y
         self.move(self.drag_widget, delta_x, delta_y)
-        self.move(self.keypoint_manager.get_text_id_by_kp_id(self.drag_widget), delta_x, delta_y)
         self.draw_skeleton_lines()
     
     def get_containter_top_left(self) -> tuple[int, int]:
         return self.bbox(self.container)[:2]
     
-    def create_kp_on_random_position(self, key: str) -> tuple[int, int]:
+    def create_kp_on_random_position(self, key: str) -> int:
         """Создаём точку на случайной позиции со случайным цветом. 
         
-        Возвращает id точки и текста"""
+        Возвращает id точки"""
         from random import randint
         cont_x1, cont_y1, cont_x2, cont_y2 = self.bbox(self.container)
         r = int(self.KP_RADIUS*self.imscale)
         pos_x = randint(cont_x1+r, cont_x2-r)
         pos_y = randint(cont_y1+r, cont_y2-r)
         kp_id = self.create_text(pos_x, pos_y, text="", tags=self.KP_TAG)
-        # TODO text_id нам не нужен. Его нужно убрать отсюда и из keypoint_manager
-        text_id = self.create_text(pos_x-r, pos_y-r-10, text=key, font=("Helvetica", 10), tags=self.KP_TEXT_TAG)
-
-        return kp_id, text_id
+        self.create_text(pos_x-r, pos_y-r-10, text=key, font=("Helvetica", 10), tags=self.KP_TEXT_TAG)
+        return kp_id
     
     def toggle_kp_visibility(self, event):
         id = self.find_closest_kp(event.x, event.y, halo=LabelingCanvas.KP_RADIUS)

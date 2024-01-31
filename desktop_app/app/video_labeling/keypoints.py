@@ -14,7 +14,6 @@ class KeypointManager:
         self.keypoint_by_name: Dict[str, Keypoint] = {}
         self.kp_name_by_id: Dict[int, str] = {}
         self.kp_id_by_name: Dict[str, int] = {}
-        self.kp_text_by_kp_id: Dict[int, int] = {}
     
     def get_keypoints_coordinates(self) -> Dict[str, tuple[float, float]]:
         '''Возвращает координаты всех точек в словаре {название_точки: (xi, yi)}'''
@@ -38,20 +37,6 @@ class KeypointManager:
         self.kp_name_by_id[kp_id] = kp_name
         self.kp_id_by_name[kp_name] = kp_id
     
-    def add_kp_text(self, kp: int | str, text_id: int):
-        '''Добавляет напись, соответствующую точке.
-        
-        - `kp` - id на Canvas или название точки;
-        
-        - `text_id` - id надписи на Canvas'''
-        if isinstance(kp, str):
-            id = self.kp_id_by_name[kp]
-            self.kp_text_by_kp_id[id] = text_id
-        elif isinstance(kp, int):
-            self.kp_text_by_kp_id[kp] = text_id
-        else:
-            raise TypeError("kp can be only int or str.")
-    
     def get_kp_by_name(self, name: str) -> "Keypoint":
         '''Возвращает объект `Keypoint` по названию точки.'''
         return self.keypoint_by_name[name]
@@ -67,10 +52,6 @@ class KeypointManager:
     def get_id_by_name(self, name: str) -> int:
         '''Возвращает id точки по названию точки.'''
         return self.kp_id_by_name[name]
-    
-    def get_text_id_by_kp_id(self, id: int) -> int:
-        '''Возвращает id надписи по id точки на Canvas.'''
-        return self.kp_text_by_kp_id[id]
     
     def remove_kp(self, id_or_name: str | int):
         '''Удаляет точку из менеджера точек.
@@ -96,15 +77,10 @@ class KeypointManager:
         self.keypoint_by_name: Dict[str, Keypoint] = {}
         self.kp_name_by_id: Dict[int, str] = {}
         self.kp_id_by_name: Dict[str, int] = {}
-        self.kp_text_by_kp_id: Dict[int, int] = {}
     
     def get_kp_ids(self):
         '''Возвращает `dict_keys`, содержащий id всех точек менеджера.'''
         return self.keypoint_by_id.keys()
-    
-    def get_text_ids(self) -> Set[int]:
-        '''Возвращает `set`, содержащий id всех надписей.'''
-        return set(self.kp_text_by_kp_id.values())
     
     def clear(self):
         '''Удаляет все точки и тексты из менеджера.'''
@@ -112,7 +88,6 @@ class KeypointManager:
         self.keypoint_by_name: Dict[str, Keypoint] = {}
         self.kp_name_by_id: Dict[int, str] = {}
         self.kp_id_by_name: Dict[str, int] = {}
-        self.kp_text_by_kp_id: Dict[int, int] = {}
 
 class Keypoint:
     def __init__(self, canvas: "LabelingCanvas", id: int, skeleton_node: SkeletonNode):
