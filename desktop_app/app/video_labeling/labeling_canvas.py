@@ -8,6 +8,7 @@ from .keypoints import KeypointManager
 
 class LabelingCanvas(tk.Canvas):
     KP_TAG = "keypoint"
+    KP_TEXT_TAG = "keypoint_text"
     KP_CIRCLE_TAG = "kp_circle"
     SKELETON_LINE_TAG = "skeleton_line"
     KP_RADIUS = 10
@@ -143,11 +144,14 @@ class LabelingCanvas(tk.Canvas):
         if self.skeleton is None: return
         self.delete(self.SKELETON_LINE_TAG)
         self.delete(self.KP_CIRCLE_TAG)
+        self.delete(self.KP_TEXT_TAG)
         for kpid in self.keypoint_manager.get_kp_ids():
             kp = self.keypoint_manager.get_kp_by_id(kpid)
             x1, y1 = self.coords(kpid)
             color = "#00ff00" if kp.visible else "#ff0000"
             self.create_oval(x1-self.KP_RADIUS, y1-self.KP_RADIUS, x1+self.KP_RADIUS, y1+self.KP_RADIUS, fill=color, tags=self.KP_CIRCLE_TAG)
+            
+            self.create_text(x1-self.KP_RADIUS, y1-self.KP_RADIUS-10, text=kp.skeleton_node.name, font=("Helvetica", 10), tags=self.KP_TEXT_TAG, fill=color)
 
             parent_node = kp.skeleton_node.parent
             if parent_node is None: continue
@@ -194,10 +198,9 @@ class LabelingCanvas(tk.Canvas):
         r = int(self.KP_RADIUS*self.imscale)
         pos_x = randint(cont_x1+r, cont_x2-r)
         pos_y = randint(cont_y1+r, cont_y2-r)
-        #col = lambda: randint(0,255)
-        #color = f'#{col():02X}{col():02X}{col():02X}'
         kp_id = self.create_text(pos_x, pos_y, text="", tags=self.KP_TAG)
-        text_id = self.create_text(pos_x-r, pos_y-r, text=key)
+        # TODO text_id нам не нужен. Его нужно убрать отсюда и из keypoint_manager
+        text_id = self.create_text(pos_x-r, pos_y-r-10, text=key, font=("Helvetica", 10), tags=self.KP_TEXT_TAG)
 
         return kp_id, text_id
     
