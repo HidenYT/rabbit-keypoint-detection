@@ -27,7 +27,7 @@ class KeypointManager:
         cont_x, cont_y = self.canvas.get_containter_top_left()
         return ((kp.x-cont_x)/self.canvas.imscale, (kp.y-cont_y)/self.canvas.imscale)
 
-    def add_keypoint(self, kp_id: int, kp_name: str):
+    def add_keypoint(self, kp_id: int, kp_name: str) -> "Keypoint":
         '''Добавляет точку в менеджер по id на Canvas и названию'''
         if self.skeleton is None: raise Exception("Trying to add keypoint to the KeypointManager, but skeleton was not provided.")
         node = self.skeleton.nodes[kp_name]
@@ -36,6 +36,7 @@ class KeypointManager:
         self.keypoint_by_name[kp_name] = kp
         self.kp_name_by_id[kp_id] = kp_name
         self.kp_id_by_name[kp_name] = kp_id
+        return kp
     
     def get_kp_by_name(self, name: str) -> "Keypoint":
         '''Возвращает объект `Keypoint` по названию точки.'''

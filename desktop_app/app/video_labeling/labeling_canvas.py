@@ -1,6 +1,9 @@
+import math
 import tkinter as tk
 from tkinter import Misc
 from typing import Dict
+
+import numpy as np
 from core.models.image import ImageFile
 from PIL import ImageTk
 from core.models.skeleton import Skeleton
@@ -13,9 +16,10 @@ class LabelingCanvas(tk.Canvas):
     SKELETON_LINE_TAG = "skeleton_line"
     KP_RADIUS = 10
 
-    def __init__(self, master: Misc | None, image: ImageFile) -> None:
+    def __init__(self, 
+                 master: Misc | None, 
+                 image: ImageFile) -> None:
         super().__init__(master, bg="#ffffff")
-        # TODO Сделать так, чтобы вершины можно было делать невидимыми
 
         # Zoom изображения и перемещение по нему
         self.bind("<Control-MouseWheel>", self.on_zoom)
@@ -123,7 +127,13 @@ class LabelingCanvas(tk.Canvas):
             self.lower(imageid)  # set image into background
             self.imagetk = imagetk  # keep an extra reference to prevent garbage-collection
         
-    def set_skeleton(self, skeleton: Skeleton):
+    def set_skeleton(self, skeleton: Skeleton, 
+                     labels: dict[str, tuple[float, float]] | None = None):
+        '''Устанавливает скелет, используемый для разметки изображения на холсте.
+        После установки скелета на холсте создаются точки в соответствии со 
+        скелетом. При отсутствии `labels` точки будут иметь случайные координаты.
+
+        - `labels` - словарь, содержащий позиции для создаваемых точек.'''
         # Удаляем старые keypoint-ы
         for id in self.keypoint_manager.get_kp_ids(): self.delete(id)
         # Устанавливаем новый скелет, меняем его в менеджере точек
@@ -133,8 +143,16 @@ class LabelingCanvas(tk.Canvas):
         
         # Генерируем создаём новые точки согласно скелету
         for key in skeleton.nodes:
-            kpid = self.create_kp_on_random_position(key)
-            self.keypoint_manager.add_keypoint(kpid, key)
+            kp_visible = True
+            if labels is None:
+                kpid = self.create_kp_on_random_position()
+            else:
+                kpid = self.create_kp_on_position(labels[key])
+                if np.isnan(labels[key][0]) or np.isnan(labels[key][1]):
+                    kp_visible = False
+            kp = self.keypoint_manager.add_keypoint(kpid, key)
+            if not kp_visible:
+                kp.visible = False
         # Отрисовка
         self.draw_skeleton_lines()
     
@@ -186,8 +204,8 @@ class LabelingCanvas(tk.Canvas):
     def get_containter_top_left(self) -> tuple[int, int]:
         return self.bbox(self.container)[:2]
     
-    def create_kp_on_random_position(self, key: str) -> int:
-        """Создаём точку на случайной позиции со случайным цветом. 
+    def create_kp_on_random_position(self) -> int:
+        """Создаёт точку на случайной позиции. 
         
         Возвращает id точки"""
         from random import randint
@@ -195,8 +213,15 @@ class LabelingCanvas(tk.Canvas):
         r = int(self.KP_RADIUS*self.imscale)
         pos_x = randint(cont_x1+r, cont_x2-r)
         pos_y = randint(cont_y1+r, cont_y2-r)
-        kp_id = self.create_text(pos_x, pos_y, text="", tags=self.KP_TAG)
-        return kp_id
+        return self.create_kp_on_position((pos_x, pos_y))
+    
+    def create_kp_on_position(self, position: tuple[float, float]) -> int:
+        """Создаёт точку на заданной позиции. 
+        
+        Возвращает id точки"""
+        if np.isnan(position[0]) or np.isnan(position[1]):
+            return self.create_text(0, 0, text="", tags=self.KP_TAG)
+        return self.create_text(*position, text="", tags=self.KP_TAG)
     
     def toggle_kp_visibility(self, event):
         id = self.find_closest_kp(event.x, event.y, halo=LabelingCanvas.KP_RADIUS)

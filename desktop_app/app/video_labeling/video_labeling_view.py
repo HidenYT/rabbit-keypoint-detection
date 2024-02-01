@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from core.widgets.scrollable_frame import VerticalScrolledFrame
+from .data_saving.label_saver import LabelSaver
 from .labeling_canvas import LabelingCanvas
 from core.models.image import ImageFile
 from core.models.skeleton import Skeleton
@@ -65,13 +66,15 @@ class LabelingView(View["LabelingController"]):
         #images_list.interior.grid_columnconfigure(0, weight=1, uniform="u")
         return images_list
     
-    def add_image_to_images_list(self, image_path: str):
+    def add_image_to_images_list(self, 
+                                 image_path: str, 
+                                 labels: dict[str, tuple[float, float]] | None = None):
         # ImageFile и LabelingCanvas, хранящий изображение
         image = ImageFile(image_path)
         canvas = LabelingCanvas(self.canvas_frame, image)
 
         # Отображаем скелет, если он есть
-        if self.skeleton is not None: canvas.set_skeleton(self.skeleton)
+        if self.skeleton is not None: canvas.set_skeleton(self.skeleton, labels)
         
         def delete_image(frame: ImageButtonFrame):
             frame.pack_forget()
@@ -106,14 +109,50 @@ class LabelingView(View["LabelingController"]):
         btn_add_image = ttk.Button(menu, text="Добавить изображения", command=self.add_images)
         btn_choose_skeleton = ttk.Button(menu, text="Выбрать скелет", command=self.choose_skeleton)
         btn_save_labels = ttk.Button(menu, text="Сохранить разметку", command=self.save_labels)
+        btn_open_labels = ttk.Button(menu, text="Открыть разметку", command=self.open_labels)
         btn_save_all_dataset = ttk.Button(menu, text="Сохранить датасет", command=self.save_dataset)
         btn_check_labels = ttk.Button(menu, text="Проверить разметку", command=self.check_labels)
         btn_add_image.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_choose_skeleton.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_save_all_dataset.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_save_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
+        btn_open_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
         btn_check_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
         return menu
+    
+    def open_labels(self):
+        labels_file = filedialog.askopenfilename(
+            defaultextension="", 
+            filetypes=[csv_ft]
+        )
+        if not labels_file: return
+        self.delete_all_images()
+        df = self.controller.open_labels(labels_file)
+        # Пути к файлам изображений
+        images: list[str] = df[LabelSaver.IMAGE_PATH_COL].iloc[:, 0].to_list()
+        # Добавляем каждое изображение
+        for img_path in images:
+            self.add_image_to_images_list(img_path)
+        # Названия точек
+        kp_names = set(index[0] for index in df.columns if index[0] != LabelSaver.IMAGE_PATH_COL)
+
+        # Скелет, полученный из названий точек (не имеет связей между точками)
+        skeleton = Skeleton.from_node_names(kp_names)
+
+        # Каждому канвасу ставим свой скелет и устанавливаем координаты точек
+        for i, canvas in enumerate(self.canvases):
+            coordinates = {}
+            for kp in kp_names:
+                coordinates[kp] = tuple(df.loc[i, kp].to_list())
+            canvas.set_skeleton(skeleton, coordinates)
+
+    def delete_all_images(self):
+        for canvas in self.canvases:
+            canvas.destroy()
+        self.canvases.clear()
+        self.total_images_number = 0
+        for widget in list(self.images_list_frame.interior.children.values()):
+            widget.destroy()
 
     def add_images(self):
         images = filedialog.askopenfilenames(filetypes=[images_ft, png_ft, jpg_ft, webp_ft])

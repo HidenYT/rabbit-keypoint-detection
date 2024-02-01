@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Union, Dict, List, Tuple
+from typing import Sequence, Union, Dict, List, Tuple
 from tkinter.messagebox import showwarning
 
 class Skeleton:
@@ -43,6 +43,11 @@ class Skeleton:
         except Exception as e:
             showwarning("Ошибка при загрузке скелета", f"Неизвестная ошибка: {e}.")
         return None
+    
+    @classmethod
+    def from_node_names(cls, node_names: Sequence[str] | set[str]) -> "Skeleton":
+        df = pd.DataFrame(zip(node_names, [None]*len(node_names)), columns=[cls.KEYPOINT_NAME_FIELD, cls.PARENT_NAME_FIELD])
+        return Skeleton(df)
 
 class SkeletonCSVFieldError(Exception): pass
 

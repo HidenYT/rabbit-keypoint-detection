@@ -1,12 +1,13 @@
+import os
 from tkinter import messagebox
-
+import pandas as pd
 from .data_saving.datasets.dataset_saver_selector import DatasetSaverSelector
-from .data_saving.datasets.seven_zip_dataset_saver import SevenZipDSSaver
 from .data_saving.labels.label_saver_selector import LabelSaverSelector
 from core.mvc.view import View
 from core.mvc.controller import ControllerNavigator
 from .video_labeling_view import LabelingView
 from core.models.skeleton import DefaultSkeleton, Skeleton
+from core.filetypes import json_ft, csv_ft
 from typing import List, TYPE_CHECKING
 from .labeling_canvas import LabelingCanvas
 if TYPE_CHECKING:
@@ -27,6 +28,12 @@ class LabelingController(ControllerNavigator):
     def open_skeleton(self, file) -> Skeleton | None:
         self.skeleton = Skeleton.read_skeleton_from_csv(file)
         return self.skeleton
+    
+    def open_labels(self, file: str) -> pd.DataFrame:
+        _, ext = os.path.splitext(file)
+        if ext in csv_ft[1]:
+            return pd.read_csv(file, header=[0, 1], encoding="utf-16")
+        raise Exception(f"Can't open labels with extension {ext}")
 
     def save_labels(self, canvases: List[LabelingCanvas], file: str):
         if self.skeleton is None: 
