@@ -37,6 +37,7 @@ class LabelingCanvas(tk.Canvas):
 
         # Изображение Canvas-а
         self.image: ImageFile = image
+        self.imagetk = None
         self.imscale = 1.0
         self.width, self.height = image.pil_image.size
 
