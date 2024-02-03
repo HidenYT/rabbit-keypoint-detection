@@ -24,7 +24,7 @@ class LabelingView(View["LabelingController"]):
         self.canvases: List[LabelingCanvas] = []
 
         # Открытый Canvas
-        self.canvas: LabelingCanvas | None = None
+        self.active_canvas: LabelingCanvas | None = None
 
         # Скелет
         self.skeleton: Skeleton | None = None
@@ -87,6 +87,7 @@ class LabelingView(View["LabelingController"]):
                                      image_path, 
                                      lambda: self.show_canvas(canvas),
                                      delete_image)
+        canvas.frm_image_button = frm_image
 
         # Добавляем всё в списки
         self.canvases.append(canvas)
@@ -98,10 +99,12 @@ class LabelingView(View["LabelingController"]):
     def show_canvas(self, canvas: LabelingCanvas):
         """Открыть и показать заданный `LabelingCanvas` в `Frame`-е для `LabelingCanvas`-ов"""
         # Убираем старый Canvas
-        if self.canvas is not None:
-            self.canvas.pack_forget()
+        if self.active_canvas is not None:
+            self.active_canvas.pack_forget()
+            self.active_canvas.frm_image_button.btn_image.config(bg="#f0f0f0")
         # Ставим переданный
-        self.canvas = canvas
+        self.active_canvas = canvas
+        self.active_canvas.frm_image_button.btn_image.config(bg="yellow")
         canvas.pack(fill=tk.BOTH, expand=True)
 
     def create_action_menu(self) -> tk.Frame:
@@ -150,6 +153,7 @@ class LabelingView(View["LabelingController"]):
         for canvas in self.canvases:
             canvas.destroy()
         self.canvases.clear()
+        self.active_canvas = None
         self.total_images_number = 0
         for widget in list(self.images_list_frame.interior.children.values()):
             widget.destroy()
@@ -192,15 +196,15 @@ class LabelingView(View["LabelingController"]):
             self.controller.save_dataset(self.canvases, file)
     
     def check_labels(self):
-        if self.canvas is None: return
+        if self.active_canvas is None: return
         import matplotlib.pyplot as plt
-        with CanvasScaler(self.canvas):
-            kps = self.canvas.keypoint_manager.get_keypoints_coordinates()
+        with CanvasScaler(self.active_canvas):
+            kps = self.active_canvas.keypoint_manager.get_keypoints_coordinates()
         x, y = [], []
         for f, s in kps.values():
             x.append(f)
             y.append(s)
-        plt.imshow(self.canvas.image.pil_image)
+        plt.imshow(self.active_canvas.image.pil_image)
         plt.scatter(x, y)
         plt.show()
 
@@ -211,13 +215,13 @@ class ImageButtonFrame(tk.Frame):
                  open_image_command: Callable,
                  close_callback: Callable[["ImageButtonFrame"], Any]):
         super().__init__(master)
-        btn_image = tk.Button(
+        btn_image = self.btn_image = tk.Button(
             self, 
             text=f"{image_path}", 
             command=open_image_command,
             anchor="e",
         )
-        btn_del = tk.Button(
+        btn_del = self.btn_del = tk.Button(
             self,
             text = "X",
             command=lambda:close_callback(self),

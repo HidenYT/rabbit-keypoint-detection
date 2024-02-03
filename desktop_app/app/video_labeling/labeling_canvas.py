@@ -1,13 +1,14 @@
-import math
 import tkinter as tk
 from tkinter import Misc
-from typing import Dict
-
+from typing import TYPE_CHECKING
 import numpy as np
 from core.models.image import ImageFile
 from PIL import ImageTk
 from core.models.skeleton import Skeleton
 from .keypoints import KeypointManager
+
+if TYPE_CHECKING:
+    from .video_labeling_view import ImageButtonFrame
 
 class LabelingCanvas(tk.Canvas):
     KP_TAG = "keypoint"
@@ -52,6 +53,9 @@ class LabelingCanvas(tk.Canvas):
 
         # Менеджер точек
         self.keypoint_manager = KeypointManager(self)
+        
+        # Связанный с данным холстом фрейм для открытия холста
+        self.frm_image_button: ImageButtonFrame | None = None
 
         self.bind("<Configure>", lambda x: self.update_image())
 
