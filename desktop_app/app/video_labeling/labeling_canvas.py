@@ -235,12 +235,9 @@ class LabelingCanvas(tk.Canvas):
     
     def pack_forget(self) -> None:
         super().pack_forget()
-        self.image.pil_image.close()
-    
-    def pack(self, *args, **kwargs):
-        self.image.reopen()
-        super().pack(*args, **kwargs)
+        self.image.close_pil_image()
     
     def destroy(self) -> None:
         super().destroy()
-        self.image.pil_image.close()
+        del self.imagetk
+        self.image.close_pil_image()

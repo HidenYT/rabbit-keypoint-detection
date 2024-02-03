@@ -77,10 +77,8 @@ class LabelingView(View["LabelingController"]):
         if self.skeleton is not None: canvas.set_skeleton(self.skeleton, labels)
         
         def delete_image(frame: ImageButtonFrame):
-            frame.pack_forget()
             frame.destroy()
             self.canvases.remove(canvas)
-            canvas.pack_forget()
             canvas.destroy()
 
         frm_image = ImageButtonFrame(self.images_list_frame.interior, 
@@ -184,6 +182,9 @@ class LabelingView(View["LabelingController"]):
         # Сохраняем отметки
         with CanvasScaler(self.canvases):
             self.controller.save_labels(self.canvases, file)
+        for canvas in self.canvases:
+            if canvas != self.active_canvas:
+                canvas.image.close_pil_image()
     
     def save_dataset(self):
         file = filedialog.asksaveasfilename(
@@ -194,6 +195,9 @@ class LabelingView(View["LabelingController"]):
         # Сохраняем отметки
         with CanvasScaler(self.canvases):
             self.controller.save_dataset(self.canvases, file)
+        for canvas in self.canvases:
+            if canvas != self.active_canvas:
+                canvas.image.close_pil_image()
     
     def check_labels(self):
         if self.active_canvas is None: return
