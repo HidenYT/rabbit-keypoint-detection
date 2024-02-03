@@ -133,7 +133,12 @@ class LabelingView(View["LabelingController"]):
         images: list[str] = df[LabelSaver.IMAGE_PATH_COL].iloc[:, 0].to_list()
         # Добавляем каждое изображение
         for img_path in images:
-            self.add_image_to_images_list(img_path)
+            try:
+                self.add_image_to_images_list(img_path)
+            except FileNotFoundError:
+                from pathlib import Path
+                img_path = Path(labels_file).parent / img_path
+                self.add_image_to_images_list(str(img_path))
         # Названия точек
         kp_names = set(index[0] for index in df.columns if index[0] != LabelSaver.IMAGE_PATH_COL)
 
