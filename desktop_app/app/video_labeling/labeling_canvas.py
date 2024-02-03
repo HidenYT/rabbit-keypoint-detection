@@ -232,3 +232,15 @@ class LabelingCanvas(tk.Canvas):
         if not id: return
         self.keypoint_manager.get_kp_by_id(id[0]).toggle_visibility()
         self.draw_skeleton_lines()
+    
+    def pack_forget(self) -> None:
+        super().pack_forget()
+        self.image.pil_image.close()
+    
+    def pack(self, *args, **kwargs):
+        self.image.reopen()
+        super().pack(*args, **kwargs)
+    
+    def destroy(self) -> None:
+        super().destroy()
+        self.image.pil_image.close()
