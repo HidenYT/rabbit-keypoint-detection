@@ -23,6 +23,7 @@ class MainApp(MainAppMixin):
         super().__init__(screenName, baseName, className, useTk, sync, use)
         import core.styles
         self.geometry("600x400")
+        self.state("zoomed")
         self.title(self.APP_TITLE)
         self.navbar = Navbar(self, self)
         self.navbar.pack(fill="x")
