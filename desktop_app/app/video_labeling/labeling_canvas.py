@@ -208,8 +208,8 @@ class LabelingCanvas(tk.Canvas):
         self.move(self.drag_widget, delta_x, delta_y)
         self.draw_skeleton_lines()
     
-    def get_containter_top_left(self) -> tuple[int, int]:
-        return self.bbox(self.container)[:2]
+    def get_containter_top_left(self) -> list[float]:
+        return self.coords(self.container)[:2]
     
     def create_kp_on_random_position(self) -> int:
         """Создаёт точку на случайной позиции. 
