@@ -152,9 +152,11 @@ class LabelingCanvas(tk.Canvas):
             if labels is None:
                 kpid = self.create_kp_on_random_position()
             else:
-                kpid = self.create_kp_on_position(labels[key])
                 if np.isnan(labels[key][0]) or np.isnan(labels[key][1]):
                     kp_visible = False
+                    kpid = self.create_kp_on_random_position()
+                else:
+                    kpid = self.create_kp_on_position(labels[key])
             kp = self.keypoint_manager.add_keypoint(kpid, key)
             if not kp_visible:
                 kp.visible = False
@@ -215,17 +217,14 @@ class LabelingCanvas(tk.Canvas):
         Возвращает id точки"""
         from random import randint
         cont_x1, cont_y1, cont_x2, cont_y2 = self.bbox(self.container)
-        r = int(self.KP_RADIUS*self.imscale)
-        pos_x = randint(cont_x1+r, cont_x2-r)
-        pos_y = randint(cont_y1+r, cont_y2-r)
+        pos_x = randint((cont_x1*3+cont_x2)//4, (cont_x1+cont_x2*3)//4)
+        pos_y = randint((cont_y1*3+cont_y2)//4, (cont_y1+cont_y2*3)//4)
         return self.create_kp_on_position((pos_x, pos_y))
     
     def create_kp_on_position(self, position: tuple[float, float]) -> int:
         """Создаёт точку на заданной позиции. 
         
         Возвращает id точки"""
-        if np.isnan(position[0]) or np.isnan(position[1]):
-            return self.create_text(0, 0, text="", tags=self.KP_TAG)
         return self.create_text(*position, text="", tags=self.KP_TAG)
     
     def toggle_kp_visibility(self, event):
