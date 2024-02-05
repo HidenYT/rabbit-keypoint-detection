@@ -79,6 +79,8 @@ class LabelingView(View["LabelingController"]):
         def delete_image(frame: ImageButtonFrame):
             frame.destroy()
             self.canvases.remove(canvas)
+            if self.active_canvas is canvas:
+                self.active_canvas = None
             canvas.destroy()
 
         frm_image = ImageButtonFrame(self.images_list_frame.interior, 
