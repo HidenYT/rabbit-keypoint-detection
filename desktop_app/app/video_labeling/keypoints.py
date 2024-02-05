@@ -25,7 +25,7 @@ class KeypointManager:
     def get_keypoint_coordinates(self, kp: "Keypoint") -> Tuple[float, float]:
         '''Возвращает координаты точки в виде пары xi, yi'''
         cont_x, cont_y = self.canvas.get_containter_top_left()
-        return ((kp.x-cont_x)/self.canvas.imscale, (kp.y-cont_y)/self.canvas.imscale)
+        return ((kp.x-cont_x)/self.canvas.imscale-1, (kp.y-cont_y)/self.canvas.imscale-1)
 
     def add_keypoint(self, kp_id: int, kp_name: str) -> "Keypoint":
         '''Добавляет точку в менеджер по id на Canvas и названию'''

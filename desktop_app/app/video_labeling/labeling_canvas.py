@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Misc
 from typing import TYPE_CHECKING
+from PIL import Image
 import numpy as np
 from core.models.image import ImageFile
 from PIL import ImageTk
@@ -126,7 +127,7 @@ class LabelingCanvas(tk.Canvas):
             x = min(int(x2 / self.imscale), self.width)   # sometimes it is larger on 1 pixel...
             y = min(int(y2 / self.imscale), self.height)  # ...and sometimes not
             image = self.image.pil_image.crop((int(x1 / self.imscale), int(y1 / self.imscale), x, y))
-            imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1), int(y2 - y1))))
+            imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1), int(y2 - y1)), resample=Image.NEAREST))
             imageid = self.create_image(max(bbox2[0], bbox1[0]), max(bbox2[1], bbox1[1]),
                                                anchor='nw', image=imagetk)
             self.lower(imageid)  # set image into background
