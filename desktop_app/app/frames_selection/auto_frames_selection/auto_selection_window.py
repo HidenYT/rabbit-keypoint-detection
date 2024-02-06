@@ -6,9 +6,6 @@ from .auto_selector import (
     AutoSelector, 
     SELECTION_RANDOM, 
     SELECTION_UNIFORM,
-    DELETION_DBSCAN,
-    DELETION_HIERARCHICAL,
-    DELETION_KMEANS,
 )
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
@@ -28,8 +25,6 @@ class AutoFrameSelectionWindow(tk.Toplevel):
         self.setup_frames_n_entry()
 
         self.setup_selection_method()
-
-        self.setup_duplicates_deletion_method()
 
         btn_start = ttk.Button(self, text="Начать", command=self.start_auto_selection)
         btn_start.pack()
@@ -60,52 +55,15 @@ class AutoFrameSelectionWindow(tk.Toplevel):
         sel_method_uniform.pack(side='left', fill='x')
         frm.pack()
     
-    def setup_duplicates_deletion_method(self):
-        self.delete_duplicates_var = tk.BooleanVar(value=True)
-        def checkbox_toggle():
-            if self.delete_duplicates_var.get(): state = 'normal'
-            else: state = 'disabled'
-            for child in frm.winfo_children():
-                    child.configure(state=state)
-        chck_delete_duplicates = ttk.Checkbutton(self, text="Удалять похожие кадры", command=checkbox_toggle, variable=self.delete_duplicates_var)
-        chck_delete_duplicates.pack()
-        frm = ttk.Frame(self)
-        lbl_deletion_method = ttk.Label(frm, text="Метод удаления похожих кадров")
-        lbl_deletion_method.pack()
-        self.dupl_deletion_method_var = var = tk.StringVar(value=DELETION_KMEANS)
-        kmeans_del_method = ttk.Radiobutton(frm,
-                                            variable=var,
-                                            value=DELETION_KMEANS,
-                                            text="K-Means")
-        kmeans_del_method.pack(side='left', fill='x')
-        
-        dbscan_del_method = ttk.Radiobutton(frm,
-                                            variable=var,
-                                            value=DELETION_DBSCAN,
-                                            text="DBSCAN")
-        dbscan_del_method.pack(side='left', fill='x')
-        
-        hierarchical_del_method = ttk.Radiobutton(frm,
-                                            variable=var,
-                                            value=DELETION_HIERARCHICAL,
-                                            text="Hierarchical")
-        hierarchical_del_method.pack(side='left', fill='x')
-        frm.pack()
-    
     def start_auto_selection(self):
         if not self.entr_frames_n.get(): 
             messagebox.showwarning("Выборка кадров", "Введите число кадров.", parent=self)
             return
-        dupl_method = self.dupl_deletion_method_var.get() if self.delete_duplicates_var.get() else None
         auto_selector = AutoSelector(self.total_frames,
                                      int(self.entr_frames_n.get()),
                                      self.selection_method_var.get(),
-                                     self.frame_src, 
-                                     dupl_method)
+                                     self.frame_src)
         auto_selector.select_frames()
-        if self.delete_duplicates_var.get():
-            auto_selector.find_duplicates()
-            auto_selector.remove_duplicates()
         messagebox.showinfo("Выборка кадров", "Автоматическая выборка кадров успешно завершена.", parent=self)
         self.selected_frames = selected_frames = sorted(auto_selector.frames_nums)
         if self.frm_selected_frames is not None: self.frm_selected_frames.destroy()

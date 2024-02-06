@@ -1,6 +1,7 @@
 import os
 from tkinter import messagebox
-from typing import TYPE_CHECKING, Iterable, List, Tuple
+from typing import TYPE_CHECKING, Iterable, List
+from PIL import Image
 import tkinter as tk
 from tkinter import ttk, filedialog
 import numpy as np
@@ -88,5 +89,22 @@ class FramesSelectionView(View["FramesSelectionController"],
             if img is None: 
                 raise Exception(f"Image at index {idx} is not available.")
             result.append(np.asarray(img))
+        self.controller.set_video_frame(current_cap_idx)
+        return result
+    
+    def get_all_frames(self) -> List[np.ndarray]:
+        current_cap_idx = self.controller.get_showing_frame_n()+1
+        result: List[np.ndarray] = []
+        self.controller.set_video_frame(0)
+        ret, img = self.controller.video_capture.read()
+        w, h = img.shape[:2]
+        ratio = w/h
+        while ret:
+            if ret:
+                pil_img = Image.fromarray(img).resize((30, int(30/ratio)))
+                result.append(np.array(pil_img))
+                ret, img = self.controller.video_capture.read()
+            else:
+                break
         self.controller.set_video_frame(current_cap_idx)
         return result
