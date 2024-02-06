@@ -1,3 +1,4 @@
+from math import ceil, floor
 import tkinter as tk
 from tkinter import Misc
 from typing import TYPE_CHECKING
@@ -100,35 +101,49 @@ class LabelingCanvas(tk.Canvas):
         self.update_image()
 
     def update_image(self):
-        bbox1 = self.bbox(self.container)  # get image area
+        bbox_container = self.coords(self.container)  # get image area
+        # print(bbox1[2]-bbox1[0], self.width)
         # Remove 1 pixel shift at the sides of the bbox1
-        bbox1 = (bbox1[0] + 1, bbox1[1] + 1, bbox1[2] - 1, bbox1[3] - 1)
-        bbox2 = (self.canvasx(0),  # get visible area of the canvas
+        bbox_container = (bbox_container[0] + 1, 
+                          bbox_container[1] + 1, 
+                          bbox_container[2] - 1, 
+                          bbox_container[3] - 1)
+        bbox_window = (self.canvasx(0),  # get visible area of the canvas
                  self.canvasy(0),
                  self.canvasx(self.winfo_width()),
                  self.canvasy(self.winfo_height()))
         #print(bbox1, bbox2)
-        bbox = [min(bbox1[0], bbox2[0]), min(bbox1[1], bbox2[1]),  # get scroll region box
-                max(bbox1[2], bbox2[2]), max(bbox1[3], bbox2[3])]
-        #print(bbox)
-        if bbox[0] == bbox2[0] and bbox[2] == bbox2[2]:  # whole image in the visible area
-            bbox[0] = bbox1[0]
-            bbox[2] = bbox1[2]
-        if bbox[1] == bbox2[1] and bbox[3] == bbox2[3]:  # whole image in the visible area
-            bbox[1] = bbox1[1]
-            bbox[3] = bbox1[3]
-        #self.configure(scrollregion=bbox)  # set scroll region
-        x1 = max(bbox2[0] - bbox1[0], 0)  # get coordinates (x1,y1,x2,y2) of the image tile
-        y1 = max(bbox2[1] - bbox1[1], 0)
-        x2 = min(bbox2[2], bbox1[2]) - bbox1[0]
-        y2 = min(bbox2[3], bbox1[3]) - bbox1[1]
-        #print(x1, y1, x2, y2)
-        if int(x2 - x1) > 0 and int(y2 - y1) > 0:  # show image if it in the visible area
-            x = min(int(x2 / self.imscale), self.width)   # sometimes it is larger on 1 pixel...
-            y = min(int(y2 / self.imscale), self.height)  # ...and sometimes not
-            image = self.image.pil_image.crop((int(x1 / self.imscale), int(y1 / self.imscale), x, y))
-            imagetk = ImageTk.PhotoImage(image.resize((int(x2 - x1), int(y2 - y1)), resample=Image.NEAREST))
-            imageid = self.create_image(max(bbox2[0], bbox1[0]), max(bbox2[1], bbox1[1]),
+        # bbox = [min(bbox1[0], bbox2[0]), min(bbox1[1], bbox2[1]),  # get scroll region box
+        #         max(bbox1[2], bbox2[2]), max(bbox1[3], bbox2[3])]
+        # #print(bbox)
+        # if bbox[0] == bbox2[0] and bbox[2] == bbox2[2]:  # whole image in the visible area
+        #     bbox[0] = bbox1[0]
+        #     bbox[2] = bbox1[2]
+        # if bbox[1] == bbox2[1] and bbox[3] == bbox2[3]:  # whole image in the visible area
+        #     bbox[1] = bbox1[1]
+        #     bbox[3] = bbox1[3]
+        # #self.configure(scrollregion=bbox)  # set scroll region
+        top_left_x = max(bbox_window[0] - bbox_container[0], 0)
+        top_left_y = max(bbox_window[1] - bbox_container[1], 0)
+        bottom_right_x = min(bbox_window[2], bbox_container[2]) - bbox_container[0]
+        bottom_right_y = min(bbox_window[3], bbox_container[3]) - bbox_container[1]
+        crop_top_left_x = ((floor(top_left_x / self.imscale)-1)/self.width)*(bbox_container[2]-bbox_container[0])+bbox_container[0]
+        crop_top_left_y = ((floor(top_left_y / self.imscale)-1)/self.height)*(bbox_container[3]-bbox_container[1])+bbox_container[1]
+        crop_bottom_right_x = (ceil(bottom_right_x / self.imscale)/self.width)*(bbox_container[2]-bbox_container[0])+bbox_container[0]
+        crop_bottom_right_y = (ceil(bottom_right_y / self.imscale)/self.height)*(bbox_container[3]-bbox_container[1])+bbox_container[1]
+        bbox_window = (crop_top_left_x, crop_top_left_y, crop_bottom_right_x, crop_bottom_right_y)
+        
+        top_left_x = max(bbox_window[0] - bbox_container[0], 0) 
+        top_left_y = max(bbox_window[1] - bbox_container[1], 0)
+        bottom_right_x = min(bbox_window[2], bbox_container[2]) - bbox_container[0]
+        bottom_right_y = min(bbox_window[3], bbox_container[3]) - bbox_container[1]
+        print(bbox_window[0], bbox_container[0])
+        if int(bottom_right_x - top_left_x) > 0 and int(bottom_right_y - top_left_y) > 0:
+            x = min(int(bottom_right_x / self.imscale)+1, self.width)
+            y = min(int(bottom_right_y / self.imscale)+1, self.height)
+            image = self.image.pil_image.crop((ceil(top_left_x / self.imscale), ceil(top_left_y / self.imscale), x, y))
+            imagetk = ImageTk.PhotoImage(image.resize((ceil(bottom_right_x - top_left_x), ceil(bottom_right_y - top_left_y)), resample=Image.NEAREST))
+            imageid = self.create_image(max(bbox_window[0], bbox_container[0])+0.5*self.imscale, max(bbox_window[1], bbox_container[1])+0.5*self.imscale,
                                                anchor='nw', image=imagetk)
             self.lower(imageid)  # set image into background
             self.imagetk = imagetk  # keep an extra reference to prevent garbage-collection
