@@ -129,8 +129,8 @@ class LabelingCanvas(tk.Canvas):
         bottom_right_y = min(bbox_window[3], bbox_container[3]) - bbox_container[1]
         crop_top_left_x = ((floor(top_left_x / self.imscale)-1)/self.width)*(bbox_container[2]-bbox_container[0])+bbox_container[0]
         crop_top_left_y = ((floor(top_left_y / self.imscale)-1)/self.height)*(bbox_container[3]-bbox_container[1])+bbox_container[1]
-        crop_bottom_right_x = (ceil(bottom_right_x / self.imscale)/self.width)*(bbox_container[2]-bbox_container[0])+bbox_container[0]
-        crop_bottom_right_y = (ceil(bottom_right_y / self.imscale)/self.height)*(bbox_container[3]-bbox_container[1])+bbox_container[1]
+        crop_bottom_right_x = ((ceil(bottom_right_x / self.imscale)+1)/self.width)*(bbox_container[2]-bbox_container[0])+bbox_container[0]
+        crop_bottom_right_y = ((ceil(bottom_right_y / self.imscale)+1)/self.height)*(bbox_container[3]-bbox_container[1])+bbox_container[1]
         bbox_window = (crop_top_left_x, crop_top_left_y, crop_bottom_right_x, crop_bottom_right_y)
         
         top_left_x = max(bbox_window[0] - bbox_container[0], 0) 
@@ -138,11 +138,11 @@ class LabelingCanvas(tk.Canvas):
         bottom_right_x = min(bbox_window[2], bbox_container[2]) - bbox_container[0]
         bottom_right_y = min(bbox_window[3], bbox_container[3]) - bbox_container[1]
         if int(bottom_right_x - top_left_x) > 0 and int(bottom_right_y - top_left_y) > 0:
-            x = min(int(bottom_right_x / self.imscale)+1, self.width)
-            y = min(int(bottom_right_y / self.imscale)+1, self.height)
+            x = min(ceil(bottom_right_x / self.imscale)+0, self.width)
+            y = min(ceil(bottom_right_y / self.imscale)+0, self.height)
             image = self.image.pil_image.crop((ceil(top_left_x / self.imscale), ceil(top_left_y / self.imscale), x, y))
             imagetk = ImageTk.PhotoImage(image.resize((ceil(bottom_right_x - top_left_x), ceil(bottom_right_y - top_left_y)), resample=Image.NEAREST))
-            imageid = self.create_image(max(bbox_window[0], bbox_container[0])+0.5*self.imscale, max(bbox_window[1], bbox_container[1])+0.5*self.imscale,
+            imageid = self.create_image(max(bbox_window[0], bbox_container[0])-0.5*self.imscale, max(bbox_window[1], bbox_container[1])-0.5*self.imscale,
                                                anchor='nw', image=imagetk)
             self.lower(imageid)  # set image into background
             self.imagetk = imagetk  # keep an extra reference to prevent garbage-collection
