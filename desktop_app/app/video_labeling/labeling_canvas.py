@@ -137,7 +137,6 @@ class LabelingCanvas(tk.Canvas):
         top_left_y = max(bbox_window[1] - bbox_container[1], 0)
         bottom_right_x = min(bbox_window[2], bbox_container[2]) - bbox_container[0]
         bottom_right_y = min(bbox_window[3], bbox_container[3]) - bbox_container[1]
-        print(bbox_window[0], bbox_container[0])
         if int(bottom_right_x - top_left_x) > 0 and int(bottom_right_y - top_left_y) > 0:
             x = min(int(bottom_right_x / self.imscale)+1, self.width)
             y = min(int(bottom_right_y / self.imscale)+1, self.height)
