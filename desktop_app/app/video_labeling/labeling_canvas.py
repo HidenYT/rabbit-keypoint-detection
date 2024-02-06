@@ -25,7 +25,7 @@ class LabelingCanvas(tk.Canvas):
         super().__init__(master, bg="#ffffff")
 
         # Zoom изображения и перемещение по нему
-        self.bind("<Control-MouseWheel>", self.on_zoom)
+        self.bind("<MouseWheel>", self.on_zoom)
         self.bind('<ButtonPress-3>', self.on_mouse_rb_press)
         self.bind("<B3-Motion>", self.on_mouse_rb_move)
 
