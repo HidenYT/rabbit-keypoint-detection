@@ -32,7 +32,7 @@ class LabelingController(ControllerNavigator):
     def open_labels(self, file: str) -> pd.DataFrame:
         _, ext = os.path.splitext(file)
         if ext in csv_ft[1]:
-            return pd.read_csv(file, header=[0, 1], encoding="utf-16")
+            return pd.read_csv(file, header=[0, 1], encoding="utf-8")
         raise Exception(f"Can't open labels with extension {ext}")
 
     def save_labels(self, canvases: List[LabelingCanvas], file: str):
