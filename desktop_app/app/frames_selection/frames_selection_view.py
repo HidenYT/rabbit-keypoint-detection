@@ -1,10 +1,9 @@
 import os
 from tkinter import messagebox
-from typing import TYPE_CHECKING, Iterable, List, Tuple
+from typing import TYPE_CHECKING, Iterable, List
 import tkinter as tk
 from tkinter import ttk, filedialog
-import numpy as np
-from .auto_frames_selection.auto_selector import FramesSource
+from .auto_frames_selection.interfaces import FramesSource
 from .auto_frames_selection.auto_selection_window import AutoFrameSelectionWindow
 from frames_selection.selected_frames_frame import SelectedFramesFrame
 from frames_selection.frames_selection_manager import FramesSelectionManager
@@ -12,6 +11,7 @@ from .video_frame_change_listener import VideoFrameChangeListener
 from .video_frame import VideoFrame
 from core.mvc.view import View
 from core.filetypes import videos_ft
+from PIL import Image
 if TYPE_CHECKING:
     from .frames_selection_controller import FramesSelectionController
 
@@ -79,14 +79,14 @@ class FramesSelectionView(View["FramesSelectionController"],
             else:
                 messagebox.showerror("Сохранение", "При сохранении произошла ошибка.")
 
-    def get_frames_by_indicies(self, indicies: Iterable[int]) -> List[np.ndarray]:
+    def get_frames_by_indicies(self, indicies: Iterable[int]) -> List[Image.Image]:
         current_cap_idx = self.controller.get_showing_frame_n()+1
-        result: List[np.ndarray] = []
+        result: List[Image.Image] = []
         for idx in indicies:
             self.controller.set_video_frame(idx)
             img = self.controller.get_current_frame()
             if img is None: 
                 raise Exception(f"Image at index {idx} is not available.")
-            result.append(np.asarray(img))
+            result.append(img)
         self.controller.set_video_frame(current_cap_idx)
         return result

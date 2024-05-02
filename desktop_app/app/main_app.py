@@ -3,8 +3,6 @@ from frames_selection.frames_selection_controller import FramesSelectionControll
 from core.main_app_interface import MainAppMixin
 from skeleton_creation.skeleton_controller import SkeletonController
 from video_labeling.video_labeling_controller import LabelingController
-from nn_learning.nn_learning_controller import LearningController
-from nn_inference.nn_inference_controller import InferenceController
 from core.widgets.navbar import Navbar
 
 from typing import TYPE_CHECKING
@@ -43,12 +41,6 @@ class MainApp(MainAppMixin):
 
     def go_to_frames_labeling(self):
         self.show_view(LabelingController(self).create_view())
-    
-    def go_to_nn_training(self):
-        self.show_view(LearningController(self).create_view())
-    
-    def go_to_nn_inference(self):
-        self.show_view(InferenceController(self).create_view())
 
     def show_view(self, view: "View"):
         self.frame.pack_forget()

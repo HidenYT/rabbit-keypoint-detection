@@ -12,12 +12,7 @@ class INavigator(ABC):
     
     @abstractmethod
     def go_to_frames_labeling(self): pass
-    
-    @abstractmethod
-    def go_to_nn_training(self): pass
-    
-    @abstractmethod
-    def go_to_nn_inference(self): pass
+
 
 class Navbar(tk.Frame):
     '''Главное меню, которое является фреймом `Frame`. 
@@ -25,7 +20,7 @@ class Navbar(tk.Frame):
     def __init__(self, navigator: INavigator, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         
-        btn_create_frames = ttk.Button(self, text="Создать кадры для разметки", 
+        btn_create_frames = ttk.Button(self, text="Выбрать кадры для разметки", 
                                       command=navigator.go_to_frames_creation,
                                       style="navbar.TButton",
                                       takefocus=False)
@@ -37,20 +32,10 @@ class Navbar(tk.Frame):
                                         command=navigator.go_to_frames_labeling,
                                         style="navbar.TButton",
                                       takefocus=False)
-        btn_nn_training = ttk.Button(self, text="Обучить нейросеть", 
-                                        command=navigator.go_to_nn_training,
-                                        style="navbar.TButton",
-                                      takefocus=False)
-        btn_nn_inference = ttk.Button(self, text="Запустить нейросеть", 
-                                        command=navigator.go_to_nn_inference,
-                                        style="navbar.TButton",
-                                      takefocus=False)
         btns = [
             btn_create_frames,
             btn_create_skeleton,
             btn_frames_labeling,
-            btn_nn_training,
-            btn_nn_inference,
         ]
         for i in range(len(btns)):
             self.columnconfigure(i, weight=1, uniform="uniform")

@@ -17,12 +17,18 @@ class VideoFrameCanvas(tk.Canvas):
     def calculate_good_img_size(self) -> Tuple[int, int]:
         ratio = self.pil_img.width/self.pil_img.height
         result_w, result_h = self.pil_img.size
-        if result_w > self.canvas_w:
+        if ratio > 1:
             result_w = self.canvas_w
             result_h = result_w/ratio
-        if result_h > self.canvas_h:
+            if result_h > self.canvas_h:
+                result_h = self.canvas_h
+                result_w = ratio * result_h
+        else:
             result_h = self.canvas_h
             result_w = ratio * result_h
+            if result_w > self.canvas_w:
+                result_w = self.canvas_w
+                result_h = result_w/ratio
         return int(result_w), int(result_h)
 
     def calculate_good_img_position(self):
