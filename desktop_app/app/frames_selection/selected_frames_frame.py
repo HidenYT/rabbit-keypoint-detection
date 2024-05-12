@@ -25,7 +25,8 @@ class SelectedFramesFrame(VerticalScrolledFrame,
             self.frame_change_listener.on_video_frame_change_complete(frame_idx)
         btn_frame = ttk.Button(self.interior,
                                text=str(frame_idx),
-                               command=choose_frame)
+                               command=choose_frame,
+                               style="default.TButton")
         self.frame_buttons[frame_idx] = btn_frame
         self.redraw_buttons()
 

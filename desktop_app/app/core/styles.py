@@ -1,10 +1,10 @@
 from tkinter import ttk
 
-ttk.Style().configure("default.TButton", padding=10, font=('Helvetica', 10))
+ttk.Style().configure("default.TButton", padding=5, font=('Helvetica', 10))
 
 ttk.Style().configure("navbar.TButton", padding=10, font=('Helvetica', 10), relief="!pressed")
 
-ttk.Style().configure("default.TLabel", font=('Helvetica', 10), padding=10)
+ttk.Style().configure("default.TLabel", font=('Helvetica', 10), padding=5)
 
 ttk.Style().configure("skeleton_table_cell.TEntry", padding=10)
 
@@ -22,6 +22,3 @@ selected_skeleton_table_cell.configure("selected_skeleton_table_cell.TEntry",
                  padding=10,)
 
 skeleton_table_cell_font = ('Helvetica', 10)
-
-ttk.Style().configure("selection_selected.TButton", foreground="green")
-ttk.Style().configure("selection_notselected.TButton", foreground="red")

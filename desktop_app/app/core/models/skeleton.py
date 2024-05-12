@@ -26,15 +26,18 @@ class Skeleton:
             if parent_name is not None:
                 self.nodes[node_name].parent = self.nodes[parent_name]
 
+    def to_csv(self, file):
+        self.df.to_csv(file, index=False, encoding="utf-8")
+
     @staticmethod
     def create_skeleton_csv(data: List[Tuple[str, str]], file):
         df = pd.DataFrame(data=data, columns=[Skeleton.KEYPOINT_NAME_FIELD, Skeleton.PARENT_NAME_FIELD])
-        df.to_csv(file, index=False)
+        df.to_csv(file, index=False, encoding="utf-8", lineterminator='\n')
 
     @staticmethod
     def read_skeleton_from_csv(file) -> Union["Skeleton", None]:
         try:
-            df = pd.read_csv(file)
+            df = pd.read_csv(file, encoding="utf-8")
             return Skeleton(df)
         except SkeletonCSVFieldError as e:
             showwarning("Ошибка при загрузке скелета", str(e))

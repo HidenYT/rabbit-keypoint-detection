@@ -26,8 +26,11 @@ class FramesSelectionView(View["FramesSelectionController"],
     def setup_content_frame(self):
         self.right_panel = self.setup_left_panel()
         self.video_frame = self.setup_video_frame()
-        self.video_frame.pack(side='left', fill='both', expand=True, padx=10, pady=10)
-        self.right_panel.pack(side='right', fill='both', expand=True)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=60, uniform="uniform")
+        self.grid_columnconfigure(1, weight=40, uniform="uniform")
+        self.video_frame.grid(column=0, row=0, sticky="news")
+        self.right_panel.grid(column=1, row=0, sticky="news")
 
     def setup_video_frame(self) -> VideoFrame:
         return VideoFrame(self, 
@@ -37,18 +40,21 @@ class FramesSelectionView(View["FramesSelectionController"],
 
     def setup_left_panel(self) -> tk.Frame:
         frm = tk.Frame(self)
-        lbl_info = tk.Label(frm, text="Выбранные кадры")
+        lbl_info = ttk.Label(frm, text="Выбранные кадры", anchor="center", style="default.TLabel")
         lbl_info.pack(fill='x')
         self.frm_selected_frames = SelectedFramesFrame(frm, self)
         self.frames_selection_manager = FramesSelectionManager(self.frm_selected_frames)
         self.frm_selected_frames.pack(fill='both', expand=True)
-        btn_choose_video = ttk.Button(frm, text="Открыть видео", command=self.on_open_video)
+        bottom_panel = ttk.Frame(frm)
+        btn_choose_video = ttk.Button(bottom_panel, text="Открыть видео", command=self.on_open_video, style="default.TButton")
         btn_choose_video.pack(fill="x", side='bottom')
-        btn_save = ttk.Button(frm, text="Сохранить кадры", command=self.save_selected_frames)
+        btn_save = ttk.Button(bottom_panel, text="Сохранить кадры", command=self.save_selected_frames, style="default.TButton")
         btn_save.pack(fill='x', side='bottom')
-        
-        btn_auto_select = ttk.Button(frm, text="Автоматическая выборка", command=self.open_auto_selection_window)
+        btn_auto_select = ttk.Button(bottom_panel, text="Автоматическая выборка", command=self.open_auto_selection_window, style="default.TButton")
         btn_auto_select.pack(fill='x', side='bottom')
+        sep = ttk.Separator(bottom_panel, orient="horizontal")
+        sep.pack(fill="x", side="bottom", pady=(10, 10))
+        bottom_panel.pack(fill='x', side="bottom")
         return frm
     
     def open_auto_selection_window(self):

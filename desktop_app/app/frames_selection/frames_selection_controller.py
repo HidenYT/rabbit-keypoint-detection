@@ -56,7 +56,7 @@ class FramesSelectionController(ControllerNavigator):
     def save_frames(self, frames_selection_manager: FramesSelectionManager, directory_path):
         if self.video_capture is None: return False
         try:
-            tmp_pos = int(self.video_capture.get(cv.CAP_PROP_POS_FRAMES))-1
+            tmp_pos = self.get_showing_frame_n()
             dt_str = datetime.strftime(datetime.now(), "%d.%m.%Y_%H.%M.%S")
             file_name = "frame_{}.jpg"
             dir_name = f"Frames of {self.video_file_name} {dt_str}"
@@ -75,7 +75,7 @@ class FramesSelectionController(ControllerNavigator):
                 else:
                     messagebox.showwarning("Невозможно прочитать кадр", 
                                         f"Кадр {frame_i} не может быть прочтён.")
-            self.video_capture.set(cv.CAP_PROP_POS_FRAMES, tmp_pos)
+            self.video_capture.set(cv.CAP_PROP_POS_FRAMES, tmp_pos+1)
         except Exception as e:
             return False
         return True

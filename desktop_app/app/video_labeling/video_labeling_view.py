@@ -1,3 +1,4 @@
+from tkinter import messagebox
 from core.mvc.view import View
 import tkinter as tk
 from tkinter import ttk
@@ -52,18 +53,14 @@ class LabelingView(View["LabelingController"]):
 
         # Frame для всех кнопок, находится внизу
         action_menu = self.create_action_menu()
-        
-        config_frame.grid_rowconfigure(0, weight=1, uniform="uniform")
-        config_frame.grid_rowconfigure(1, weight=1, uniform="uniform")
-        config_frame.grid_columnconfigure(0, weight=1, uniform="uniform")
-        images_list.grid(row=0, column=0, sticky="news")
-        action_menu.grid(row=1, column=0, sticky="news")
+        images_list.pack(fill="both", expand=True, side='top')
+        ttk.Separator(config_frame).pack(side="top", fill="x", pady=(10, 10))
+        action_menu.pack(side='bottom', fill="x")
 
 
     def create_images_list_frame(self) -> VerticalScrolledFrame:
         config_frame = self.configuration_frame
         images_list = VerticalScrolledFrame(config_frame)
-        #images_list.interior.grid_columnconfigure(0, weight=1, uniform="u")
         return images_list
     
     def add_image_to_images_list(self, 
@@ -109,18 +106,30 @@ class LabelingView(View["LabelingController"]):
 
     def create_action_menu(self) -> tk.Frame:
         menu = tk.Frame(self.configuration_frame)
-        btn_add_image = ttk.Button(menu, text="Добавить изображения", command=self.add_images)
-        btn_choose_skeleton = ttk.Button(menu, text="Выбрать скелет", command=self.choose_skeleton)
-        btn_save_labels = ttk.Button(menu, text="Сохранить разметку", command=self.save_labels)
-        btn_open_labels = ttk.Button(menu, text="Открыть разметку", command=self.open_labels)
-        btn_save_all_dataset = ttk.Button(menu, text="Сохранить датасет", command=self.save_dataset)
-        btn_check_labels = ttk.Button(menu, text="Проверить разметку", command=self.check_labels)
-        btn_add_image.pack(fill=tk.BOTH, side=tk.BOTTOM)
-        btn_choose_skeleton.pack(fill=tk.BOTH, side=tk.BOTTOM)
-        btn_save_all_dataset.pack(fill=tk.BOTH, side=tk.BOTTOM)
-        btn_save_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
-        btn_open_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
-        btn_check_labels.pack(fill=tk.BOTH, side=tk.BOTTOM)
+
+        skeleton_and_image_frm = ttk.Frame(menu)
+        btn_add_image = ttk.Button(skeleton_and_image_frm, text="Добавить изображения", command=self.add_images, style="default.TButton")
+        btn_choose_skeleton = ttk.Button(skeleton_and_image_frm, text="Выбрать скелет", command=self.choose_skeleton, style="default.TButton")
+        btn_add_image.grid(column=0, row=0, sticky="news")
+        btn_choose_skeleton.grid(column=1, row=0, sticky="news")
+        skeleton_and_image_frm.grid_columnconfigure("all", weight=1, uniform="uniform")
+        skeleton_and_image_frm.grid_rowconfigure(0, weight=1, uniform="uniform")
+
+        labels_frm = ttk.Frame(menu)
+        btn_save_labels = ttk.Button(labels_frm, text="Сохранить разметку", command=self.save_labels, style="default.TButton")
+        btn_open_labels = ttk.Button(labels_frm, text="Открыть разметку", command=self.open_labels, style="default.TButton")
+        btn_save_labels.grid(column=0, row=0, sticky="news")
+        btn_open_labels.grid(column=1, row=0, sticky="news")
+        labels_frm.grid_columnconfigure("all", weight=1, uniform="uniform")
+        labels_frm.grid_rowconfigure(0, weight=1, uniform="uniform")
+
+        btn_save_all_dataset = ttk.Button(menu, text="Сохранить датасет", command=self.save_dataset, style="default.TButton")
+        btn_check_labels = ttk.Button(menu, text="Проверить разметку", command=self.check_labels, style="default.TButton")
+
+        btn_save_all_dataset.pack(fill=tk.BOTH, side=tk.TOP)
+        labels_frm.pack(fill=tk.BOTH)
+        btn_check_labels.pack(fill=tk.BOTH, side=tk.TOP)
+        skeleton_and_image_frm.pack(fill=tk.BOTH)
         return menu
     
     def open_labels(self):
@@ -175,6 +184,11 @@ class LabelingView(View["LabelingController"]):
             filetypes=[csv_ft]
         )
         if not skeleton: return
+        create = messagebox.askokcancel(
+            "Изменение скелета", 
+            "Если вы выберете новый скелет, вся несохранённая разметка с предыдущим скелетом будет потеряна."
+        )
+        if not create: return
         self.skeleton = skeleton = self.controller.open_skeleton(skeleton)
         if skeleton is not None:
             for canvas in self.canvases:
@@ -209,9 +223,10 @@ class LabelingView(View["LabelingController"]):
         import matplotlib.pyplot as plt
         kps = self.active_canvas.keypoint_manager.get_keypoints_coordinates()
         x, y = [], []
-        for f, s in kps.values():
-            x.append(f)
-            y.append(s)
+        for (name, (f, s)) in kps.items():
+            if self.active_canvas.keypoint_manager.get_kp_by_name(name).visible:
+                x.append(f)
+                y.append(s)
         plt.imshow(self.active_canvas.image.pil_image)
         plt.scatter(x, y)
         plt.show()
@@ -227,11 +242,12 @@ class ImageButtonFrame(tk.Frame):
             self, 
             text=f"{image_path}", 
             command=open_image_command,
-            anchor="e",
+            borderwidth=1,
+            anchor="e"
         )
         btn_del = self.btn_del = tk.Button(
             self,
-            text = "X",
+            text = "⨉",
             command=lambda:close_callback(self),
         )
         btn_del.pack(fill=tk.BOTH, side=tk.RIGHT)

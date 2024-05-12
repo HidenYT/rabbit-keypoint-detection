@@ -45,7 +45,7 @@ class VideoFrame(tk.Frame):
     def setup_bottom_bar(self) -> tk.Frame:
         '''Возвращает Frame, хранящий кнопки управления видео.'''
         self.bottom_frame = frm = tk.Frame(self)
-        self.frame_n_label = tk.Label(frm, text="0")
+        self.frame_n_label = ttk.Label(frm, text="0", style="default.TLabel", anchor="center")
         self.frame_n_label.pack(fill='x')
 
         frm_controls = self.create_controls_frame(frm)
@@ -62,7 +62,7 @@ class VideoFrame(tk.Frame):
         self.btn_slider_left = ttk.Button(
             frm, 
             text="<", 
-            command=lambda: self.move_video_pos(-self.FRAME_CHANGE_DELTA)
+            command=lambda: self.move_video_pos(-self.FRAME_CHANGE_DELTA),
         )
         self.btn_slider_left.pack(side='left', fill='x')
 
@@ -79,7 +79,7 @@ class VideoFrame(tk.Frame):
         self.btn_slider_right = ttk.Button(
             frm, 
             text=">", 
-            command=lambda: self.move_video_pos(self.FRAME_CHANGE_DELTA)
+            command=lambda: self.move_video_pos(self.FRAME_CHANGE_DELTA),
         )
         self.btn_slider_right.pack(side='left', fill='x')
         return frm
@@ -87,16 +87,21 @@ class VideoFrame(tk.Frame):
     def create_playpause_frame(self, root) -> tk.Frame:
         '''Возвращает Frame, содержащий кнопки Пуск, Пауза, и кнопку для выбора кадра.'''
         frm = tk.Frame(root)
-        btn_play = ttk.Button(frm, text="Play", command=self.play_video)
-        btn_pause = ttk.Button(frm, text="Pause", command=self.pause_video)
+        frm.grid_columnconfigure(list(range(3)), weight=1, uniform="uniform")
+        btn_play = ttk.Button(frm, text="Пуск", command=self.play_video, style="default.TButton")
+        btn_pause = ttk.Button(frm, text="Пауза", command=self.pause_video, style="default.TButton")
         self.btn_select = tk.Button(frm, 
                                     text="Выбрать", 
                                     command=self.toggle_current_frame_selection,
                                     bg='red',
-                                    relief='flat')
-        btn_play.pack(side='left', fill='both', expand=True)
-        btn_pause.pack(side='left', fill='both', expand=True)
-        self.btn_select.pack(side='left', fill='both', expand=True)
+                                    relief='flat',
+                                    padx=5,
+                                    pady=5,
+                                    font=('Helvetica', 10),
+                                    borderwidth=1,)
+        btn_play.grid(column=0, row=0, sticky="news")
+        btn_pause.grid(column=1, row=0, sticky="news")
+        self.btn_select.grid(column=2, row=0, sticky="news")
         return frm
     
     def on_slider_move(self, value):
@@ -174,9 +179,9 @@ class VideoFrame(tk.Frame):
         '''Обновляет фон кнопки выбора кадра'''
         frame_n = int(round(float(self.slider.get())))
         if self.frame_selection_manager.selected(frame_n):
-            self.btn_select.config(bg='green')
+            self.btn_select.config(bg='green', text="Выбран")
         else:
-            self.btn_select.config(bg='red')
+            self.btn_select.config(bg='red', text="Выбрать")
         
     def update_frame(self):
         '''Обновляет текущий кадр, отображаемый № кадра, позицию слайдера и цвет кнопки выбора кадра.'''

@@ -13,7 +13,6 @@ class SkeletonController(ControllerNavigator):
         '''Вызывается представлением, когда пользователь сохраняет csv файл скелета.'''
         # Получаем все значения таблицы скелета в виде списка пар значений.
         data = [(e1.get(), e2.get()) for e1, e2 in entries_table]
-
         # Создание и сохранение pandas DataFrame в csv фйал
         Skeleton.create_skeleton_csv(data, file)
     

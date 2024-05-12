@@ -25,6 +25,10 @@ class SevenZipDSSaver(DatasetSaver):
         with py7zr.SevenZipFile(self._file, "w") as f:
             self._csv_labels_buffer.seek(0)
             f.writef(self._csv_labels_buffer, "labels.csv")
+            skeleton_buf = BytesIO()
+            self._skeleton.to_csv(skeleton_buf)
+            skeleton_buf.seek(0)
+            f.writef(skeleton_buf, "skeleton.csv")
             for i, canvas in enumerate(self._canvases):
                 img = canvas.image.pil_image
                 img_bytes = BytesIO()

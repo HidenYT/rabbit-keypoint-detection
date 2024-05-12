@@ -34,25 +34,21 @@ class SkeletonEditWindow(View["SkeletonController"]):
         
         frm_file_buttons.grid(row=0, column=0, sticky="news")
         frm_control_buttons.grid(row=0, column=1, sticky="news")
-        #frm_control_buttons.grid(fill="x", side="bottom")
     
     def create_table_control_buttons_frame(self, bottom_panel: tk.Frame):
         frm_bottom_panel = tk.Frame(bottom_panel)
-        #for i in range(2): frm_bottom_panel.grid_columnconfigure(i, weight=1)
         
         btn_del = ttk.Button(frm_bottom_panel, 
                              text="Удалить строку", 
                              command=self.remove_entries_row,
                              style="default.TButton",
                              takefocus=False)
-        #btn_del.grid(row=0, column=0, sticky="nsew")
 
         btn_add = ttk.Button(frm_bottom_panel, 
                              text="Добавить строку", 
                              command=self.add_row,
                              style="default.TButton",
                              takefocus=False)
-        #btn_add.grid(row=0, column=1, sticky="nsew")
         btn_add.pack(fill='both', expand=True)
         btn_del.pack(fill='both', expand=True)
         return frm_bottom_panel
@@ -82,9 +78,6 @@ class SkeletonEditWindow(View["SkeletonController"]):
             style="default.TButton",
             takefocus=False
         )
-        #btn_new.grid(row=0, column=0, sticky="news")
-        #btn_open.grid(row=0, column=1, sticky="news")
-        #btn_save.grid(row=0, column=2, sticky="news")
         btn_new.pack(fill="x")
         btn_open.pack(fill="x")
         btn_save.pack(fill="x")
