@@ -243,7 +243,10 @@ class ImageButtonFrame(tk.Frame):
             text=f"{image_path}", 
             command=open_image_command,
             borderwidth=1,
-            anchor="e"
+            anchor="e",
+            padx=5,
+            pady=5,
+            font=('Helvetica', 10),
         )
         btn_del = self.btn_del = tk.Button(
             self,
